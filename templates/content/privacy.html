@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy{% endblock %}
+{% block meta_description %}Privacy Policy for Next 251 Media. How we collect and use your data.{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <header class="mb-4">
+    <h1 class="display-5 text-white mb-2">Privacy Policy</h1>
+    <p class="text-muted small">Last updated: {% now "F j, Y" %}</p>
+  </header>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="content-n2m text-muted">
+        <p>This Privacy Policy describes how {{ SITE_NAME }} (“we”, “us”, “our”) collects, uses, and shares information when you use our website.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Information we collect</h2>
+        <p>We may collect information you provide directly, such as when you subscribe to our newsletter (email address), submit a contact form (name, email, message), or interact with our site. We may also collect usage data (e.g. pages visited, referrer) via standard web logs or analytics.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">How we use it</h2>
+        <p>We use your information to deliver the newsletter, respond to inquiries, improve our content and site, and comply with legal obligations.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Sharing</h2>
+        <p>We do not sell your personal data. We may share data with service providers (e.g. hosting, email delivery) under strict confidentiality, or when required by law.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Cookies</h2>
+        <p>We may use cookies and similar technologies for essential site function, analytics, and preferences. You can adjust browser settings to limit cookies.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Your rights</h2>
+        <p>Depending on your location, you may have rights to access, correct, or delete your data, or to opt out of marketing. Contact us to exercise these rights.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Contact</h2>
+        <p>For privacy-related questions: <a href="{% url 'content:contact' %}">Contact us</a>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

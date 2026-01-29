@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+{% block meta_description %}About Next 251 Media. Mission, what we cover, and the meaning of 251.{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <header class="mb-5">
+    <h1 class="display-5 text-white mb-3">About {{ SITE_NAME }}</h1>
+    <p class="lead text-muted">{{ SITE_TAGLINE }}</p>
+  </header>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <section class="mb-5">
+        <h2 class="h4 text-white mb-3">What we are</h2>
+        <p class="text-muted">{{ SITE_NAME }} (N2M) is a modern, premium, content-first media platform focused on technology, AI, startups, innovation, and the digital economy. We provide explainers, analysis, opinion, and reviews with a calm, authoritative, tech-forward tone.</p>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 text-white mb-3">Mission</h2>
+        <p class="text-muted">We aim to establish N2M as a trusted source for tech and innovation coverage, with a strong regional angle on Africa and emerging markets alongside global context. We favor quality and evergreen value over fast daily news.</p>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 text-white mb-3">What we cover</h2>
+        <ul class="text-muted">
+          <li><strong>AI</strong> — Explainers, tool reviews, impact analysis (especially Africa/emerging markets), ethics and policy</li>
+          <li><strong>Startups</strong> — Ecosystem analysis, founder guides (validation, MVP, growth), market deep dives, tools and resources</li>
+          <li><strong>Reviews</strong> — Products and services with pros, cons, and clear verdicts</li>
+          <li><strong>Opinion &amp; analysis</strong> — Calm, premium editorial on innovation and the digital economy</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h4 text-white mb-3">Meaning of “251”</h2>
+        <p class="text-muted">“251” is part of our identity: it signals forward-looking, next-generation media (Next 251). The number reflects our focus on what’s ahead — the next wave of technology, startups, and innovation.</p>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4 text-white mb-3">Get in touch</h2>
+        <p class="text-muted mb-2">For editorial, partnerships, or general inquiries:</p>
+        <a href="{% url 'content:contact' %}" class="btn btn-n2m">Contact us</a>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

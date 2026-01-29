@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }}{% endblock %}
+{% block meta_description %}Articles about {{ category.name }}. Technology, AI, Startups &amp; innovation.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="mb-4">
+    <h1 class="h2 text-white mb-2">{{ category.name }}</h1>
+    <p class="text-muted">Topic hub: latest and featured {{ category.name|lower }} content.</p>
+  </header>
+
+  {% if featured %}
+  <section class="mb-5">
+    <h2 class="h4 text-white mb-3">Featured</h2>
+    <article class="card card-n2m overflow-hidden">
+      <div class="row g-0">
+        <div class="col-md-5">
+          {% if featured.featured_image %}
+          <img src="{{ featured.featured_image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ featured.title }}" style="min-height: 240px; object-fit: cover;">
+          {% else %}
+          <div class="bg-dark d-flex align-items-center justify-content-center h-100" style="min-height: 240px;"><span class="text-muted">No image</span></div>
+          {% endif %}
+        </div>
+        <div class="col-md-7">
+          <div class="card-body p-4">
+            <h3 class="card-title h3"><a href="{{ featured.get_absolute_url }}" class="text-white text-decoration-none">{{ featured.title }}</a></h3>
+            <p class="card-text">{{ featured.excerpt|truncatewords:30 }}</p>
+            <p class="text-muted small mb-0">{{ featured.published_at|date:"F j, Y" }} · {{ featured.views }} views</p>
+            <a href="{{ featured.get_absolute_url }}" class="btn btn-n2m mt-3">Read more</a>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+  {% endif %}
+
+  <section>
+    <h2 class="h4 text-white mb-3">Latest {{ category.name }}</h2>
+    <div class="row g-4">
+      {% for post in latest %}
+      <div class="col-md-6 col-lg-4">
+        <article class="card card-n2m h-100">
+          {% if post.featured_image %}
+          <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 180px; object-fit: cover;">
+          {% else %}
+          <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 180px;"><span class="text-muted small">No image</span></div>
+          {% endif %}
+          <div class="card-body">
+            <h3 class="card-title h6"><a href="{{ post.get_absolute_url }}" class="text-white text-decoration-none">{{ post.title|truncatewords:8 }}</a></h3>
+            <p class="card-text small">{{ post.excerpt|truncatewords:15|default:post.content|truncatewords:15 }}</p>
+            <p class="text-muted small mb-0">{{ post.published_at|date:"M j, Y" }} · {{ post.views }} views</p>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <p class="text-muted">No posts in this category yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

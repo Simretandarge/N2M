@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service{% endblock %}
+{% block meta_description %}Terms of Service for Next 251 Media. Use of our website and content.{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <header class="mb-4">
+    <h1 class="display-5 text-white mb-2">Terms of Service</h1>
+    <p class="text-muted small">Last updated: {% now "F j, Y" %}</p>
+  </header>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="content-n2m text-muted">
+        <p>By using the {{ SITE_NAME }} website, you agree to these Terms of Service.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Use of the site</h2>
+        <p>You may use our site for personal, non-commercial purposes. You may not scrape, copy, or republish large portions of our content without permission, or use the site in any way that violates law or harms others.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Content</h2>
+        <p>All content on this site (articles, reviews, images, design) is owned by {{ SITE_NAME }} or its licensors. You may not reproduce, distribute, or create derivative works without our written consent.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Disclaimer</h2>
+        <p>Our content is for general information only. We do not provide professional advice. Reviews and opinions are our own; always do your own research before making decisions.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Changes</h2>
+        <p>We may update these terms from time to time. Continued use of the site after changes constitutes acceptance.</p>
+
+        <h2 class="h5 text-white mt-4 mb-2">Contact</h2>
+        <p>For questions about these terms: <a href="{% url 'content:contact' %}">Contact us</a>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

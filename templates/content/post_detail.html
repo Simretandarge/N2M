@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ post.title }}{% endblock %}
+{% block meta_description %}{{ post.excerpt|truncatewords:30|default:post.content|truncatewords:30 }}{% endblock %}
+
+{% block meta_extra %}
+<meta property="og:title" content="{{ post.title }}">
+<meta property="og:description" content="{{ post.excerpt|truncatewords:30|default:post.content|truncatewords:30 }}">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="{{ post.published_at|date:'c' }}">
+{% if post.featured_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ post.featured_image.url }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ post.title }}">
+<meta name="twitter:description" content="{{ post.excerpt|truncatewords:30|default:post.content|truncatewords:30 }}">
+{% endblock %}
+
+{% block content %}
+<article class="container py-4">
+  <header class="mb-4">
+    {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none mb-2">{{ post.category.name }}</a>{% endif %}
+    <h1 class="display-6 text-white mb-2">{{ post.title }}</h1>
+    <p class="text-muted">{{ post.published_at|date:"F j, Y" }} · {{ post.views }} views</p>
+  </header>
+
+  {% if post.featured_image %}
+  <figure class="mb-4">
+    <img src="{{ post.featured_image.url }}" class="img-fluid rounded w-100" alt="{{ post.title }}" style="max-height: 420px; object-fit: cover;">
+  </figure>
+  {% endif %}
+
+  <div class="content-n2m">
+    {{ post.content|linebreaks }}
+  </div>
+
+  {% if related %}
+  <section class="mt-5 pt-4 border-top border-secondary">
+    <h2 class="h5 text-white mb-3">Related</h2>
+    <div class="row g-3">
+      {% for p in related %}
+      <div class="col-md-6">
+        <a href="{{ p.get_absolute_url }}" class="text-decoration-none d-flex gap-3 align-items-start">
+          {% if p.featured_image %}
+          <img src="{{ p.featured_image.url }}" alt="{{ p.title }}" class="rounded flex-shrink-0" width="100" height="80" style="object-fit: cover;">
+          {% endif %}
+          <div>
+            <span class="text-white fw-medium">{{ p.title|truncatewords:6 }}</span>
+            <span class="text-muted small d-block">{{ p.published_at|date:"M j, Y" }}</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</article>
+{% endblock %}

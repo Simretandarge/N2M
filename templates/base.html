@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ SITE_NAME }}{% endblock %}{% block title_suffix %} — {{ SITE_TAGLINE }}{% endblock %}</title>
+  {% block meta_og %}
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:type" content="website">
+  {% endblock %}
+  <meta name="description" content="{% block meta_description %}{{ SITE_TAGLINE }} Technology, AI, Startups, and innovation. Africa and global context.{% endblock %}">
+  {% block meta_extra %}{% endblock %}
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-n2m">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'content:home' %}">
+        <span class="logo-circle">
+          <img src="{% static 'img/logo-icon.png' %}" alt="{{ SITE_NAME }}" class="logo-circle-img">
+        </span>
+        <span>{{ SITE_NAME }}</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'content:home' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}" href="{% url 'content:post_list' %}">Articles</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'category_ai' %}active{% endif %}" href="{% url 'content:category_ai' %}">AI</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'category_startups' %}active{% endif %}" href="{% url 'content:category_startups' %}">Startups</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}" href="{% url 'content:review_list' %}">Reviews</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'content:about' %}">About</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'content:contact' %}">Contact</a></li>
+        </ul>
+        <form class="d-flex" action="{% url 'content:post_list' %}" method="get" role="search">
+          <input class="form-control me-2" type="search" name="q" placeholder="Search articles…" value="{{ request.GET.q }}" aria-label="Search">
+          <button class="btn btn-n2m" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-4 py-lg-5">
+    {% if messages %}
+      <div class="container mb-3">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer-n2m py-5 mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+          <h5 class="text-white mb-3">{{ SITE_NAME }}</h5>
+          <p class="small mb-0">{{ SITE_TAGLINE }}</p>
+          <p class="small text-muted mt-2">Technology, AI, Startups &amp; innovation. Africa and global context.</p>
+        </div>
+        <div class="col-lg-2 col-6 mb-4 mb-lg-0">
+          <h6 class="text-white mb-3">Content</h6>
+          <ul class="list-unstyled small">
+            <li><a href="{% url 'content:post_list' %}">Articles</a></li>
+            <li><a href="{% url 'content:category_ai' %}">AI</a></li>
+            <li><a href="{% url 'content:category_startups' %}">Startups</a></li>
+            <li><a href="{% url 'content:review_list' %}">Reviews</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-6 mb-4 mb-lg-0">
+          <h6 class="text-white mb-3">Company</h6>
+          <ul class="list-unstyled small">
+            <li><a href="{% url 'content:about' %}">About</a></li>
+            <li><a href="{% url 'content:contact' %}">Contact</a></li>
+            <li><a href="{% url 'content:privacy' %}">Privacy Policy</a></li>
+            <li><a href="{% url 'content:terms' %}">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white mb-3">Newsletter</h6>
+          <form action="{% url 'content:newsletter_signup' %}" method="post" class="d-flex gap-2">
+            {% csrf_token %}
+            <input type="email" name="email" class="form-control" placeholder="Your email" required>
+            <button type="submit" class="btn btn-n2m flex-shrink-0">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <hr class="my-4 border-secondary">
+      <p class="small text-muted mb-0 text-center">&copy; {% now "Y" %} {{ SITE_NAME }}. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% block scripts_extra %}{% endblock %}
+</body>
+</html>

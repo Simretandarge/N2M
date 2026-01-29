@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Articles{% endblock %}
+{% block meta_description %}Browse all articles on technology, AI, startups, and innovation.{% endblock %}
+
+{% block content %}
+<div class="container">
+  <header class="mb-4">
+    <h1 class="h2 text-white mb-2">Articles</h1>
+    <p class="text-muted">All posts, filtered by category or search.</p>
+  </header>
+
+  <div class="row mb-4">
+    <div class="col-md-4 mb-2 mb-md-0">
+      <form action="{% url 'content:post_list' %}" method="get" class="d-flex gap-2">
+        <input type="hidden" name="category" value="{{ category_slug }}">
+        <input class="form-control" type="search" name="q" placeholder="Search…" value="{{ q }}">
+        <button class="btn btn-n2m" type="submit">Search</button>
+      </form>
+    </div>
+    <div class="col-md-8">
+      <form action="{% url 'content:post_list' %}" method="get" class="d-flex flex-wrap gap-2 align-items-center">
+        <input type="hidden" name="q" value="{{ q }}">
+        <span class="text-muted small">Category:</span>
+        <a href="{% url 'content:post_list' %}{% if q %}?q={{ q|urlencode }}{% endif %}" class="btn btn-sm {% if not category_slug %}btn-n2m{% else %}btn-outline-n2m{% endif %}">All</a>
+        {% for cat in categories %}
+        <a href="{% url 'content:post_list' %}?category={{ cat.slug }}{% if q %}&q={{ q|urlencode }}{% endif %}" class="btn btn-sm {% if category_slug == cat.slug %}btn-n2m{% else %}btn-outline-n2m{% endif %}">{{ cat.name }}</a>
+        {% endfor %}
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for post in page_obj %}
+    <div class="col-md-6 col-lg-4">
+      <article class="card card-n2m h-100">
+        {% if post.featured_image %}
+        <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+        {% else %}
+        <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 200px;"><span class="text-muted small">No image</span></div>
+        {% endif %}
+        <div class="card-body">
+          {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none mb-2">{{ post.category.name }}</a>{% endif %}
+          <h2 class="card-title h6"><a href="{{ post.get_absolute_url }}" class="text-white text-decoration-none">{{ post.title }}</a></h2>
+          <p class="card-text small">{{ post.excerpt|truncatewords:20|default:post.content|truncatewords:20 }}</p>
+          <p class="text-muted small mb-0">{{ post.published_at|date:"F j, Y" }} · {{ post.views }} views</p>
+        </div>
+      </article>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <p class="text-muted">No articles found.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-4 d-flex justify-content-center">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if category_slug %}&category={{ category_slug }}{% endif %}">Previous</a></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if category_slug %}&category={{ category_slug }}{% endif %}">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

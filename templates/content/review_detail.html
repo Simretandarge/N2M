@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ review.title }}{% endblock %}
+{% block meta_description %}{{ review.summary|truncatewords:30|default:review.content|truncatewords:30 }}{% endblock %}
+
+{% block meta_extra %}
+<meta property="og:title" content="{{ review.title }}">
+<meta property="og:description" content="{{ review.summary|truncatewords:30|default:review.content|truncatewords:30 }}">
+<meta property="og:type" content="article">
+{% if review.featured_image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ review.featured_image.url }}">{% endif %}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ review.title }}">
+<meta name="twitter:description" content="{{ review.summary|truncatewords:30|default:review.content|truncatewords:30 }}">
+{% endblock %}
+
+{% block content %}
+<article class="container py-4">
+  <header class="mb-4">
+    {% if review.rating %}<span class="badge badge-n2m mb-2">{{ review.rating }}/5</span>{% endif %}
+    <h1 class="display-6 text-white mb-2">{{ review.title }}</h1>
+    <p class="text-muted">Review of <strong>{{ review.product_name }}</strong> · {{ review.published_at|date:"F j, Y" }}</p>
+  </header>
+
+  {% if review.featured_image %}
+  <figure class="mb-4">
+    <img src="{{ review.featured_image.url }}" class="img-fluid rounded w-100" alt="{{ review.title }}" style="max-height: 420px; object-fit: cover;">
+  </figure>
+  {% endif %}
+
+  {% if review.summary %}
+  <p class="lead text-muted mb-4">{{ review.summary }}</p>
+  {% endif %}
+
+  <div class="content-n2m mb-4">
+    {{ review.content|linebreaks }}
+  </div>
+
+  <div class="row">
+    {% if review.pros_list %}
+    <div class="col-md-6 mb-3">
+      <h3 class="h5 text-white mb-2">Pros</h3>
+      <ul class="text-muted">
+        {% for item in review.pros_list %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+    {% if review.cons_list %}
+    <div class="col-md-6 mb-3">
+      <h3 class="h5 text-white mb-2">Cons</h3>
+      <ul class="text-muted">
+        {% for item in review.cons_list %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  <section class="card card-n2m p-4 mt-4">
+    <h3 class="h5 text-white mb-2">Verdict</h3>
+    <p class="mb-0 text-muted">{{ review.content|truncatewords:50 }}</p>
+    <p class="small text-muted mt-2 mb-0">Who it's for: readers looking for clear, balanced reviews of {{ review.product_name }}.</p>
+  </section>
+</article>
+{% endblock %}

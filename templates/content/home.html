@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ SITE_NAME }}{% endblock %}
+{% block meta_description %}{{ SITE_TAGLINE }} Technology, AI, Startups, and innovation. Africa and global context.{% endblock %}
+
+{% block content %}
+<section class="hero-n2m py-5 mb-5 rounded-3">
+  <div class="container text-center py-4">
+    <h1 class="display-4 fw-bold mb-3">{{ SITE_NAME }}</h1>
+    <p class="lead mb-4">{{ SITE_TAGLINE }}</p>
+    <div class="d-flex flex-wrap gap-3 justify-content-center">
+      <a href="{% url 'content:post_list' %}" class="btn btn-n2m btn-lg">Read Articles</a>
+      <a href="#newsletter" class="btn btn-outline-n2m btn-lg">Subscribe</a>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  {% if featured %}
+  <section class="mb-5">
+    <h2 class="h4 text-white mb-3">Featured</h2>
+    <article class="card card-n2m overflow-hidden">
+      <div class="row g-0">
+        <div class="col-md-5">
+          {% if featured.featured_image %}
+          <img src="{{ featured.featured_image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ featured.title }}">
+          {% else %}
+          <div class="bg-dark d-flex align-items-center justify-content-center h-100 min-vh-25" style="min-height: 240px;">
+            <span class="text-muted">No image</span>
+          </div>
+          {% endif %}
+        </div>
+        <div class="col-md-7">
+          <div class="card-body p-4">
+            {% if featured.category %}<a href="{{ featured.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none mb-2">{{ featured.category.name }}</a>{% endif %}
+            <h3 class="card-title h3"><a href="{{ featured.get_absolute_url }}" class="text-white text-decoration-none">{{ featured.title }}</a></h3>
+            <p class="card-text">{{ featured.excerpt|truncatewords:30 }}</p>
+            <p class="text-muted small mb-0">{{ featured.published_at|date:"F j, Y" }} · {{ featured.views }} views</p>
+            <a href="{{ featured.get_absolute_url }}" class="btn btn-n2m mt-3">Read more</a>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-lg-8">
+      <section class="mb-5">
+        <h2 class="h4 text-white mb-3">Latest</h2>
+        <div class="row g-4">
+          {% for post in latest %}
+          <div class="col-md-6 col-lg-4">
+            <article class="card card-n2m h-100">
+              {% if post.featured_image %}
+              <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 180px; object-fit: cover;">
+              {% else %}
+              <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 180px;"><span class="text-muted small">No image</span></div>
+              {% endif %}
+              <div class="card-body">
+                {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none mb-2">{{ post.category.name }}</a>{% endif %}
+                <h3 class="card-title h6"><a href="{{ post.get_absolute_url }}" class="text-white text-decoration-none">{{ post.title|truncatewords:8 }}</a></h3>
+                <p class="card-text small">{{ post.excerpt|truncatewords:15|default:post.content|truncatewords:15 }}</p>
+                <p class="text-muted small mb-0">{{ post.published_at|date:"M j, Y" }}</p>
+              </div>
+            </article>
+          </div>
+          {% empty %}
+          <p class="text-muted">No articles yet.</p>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="mb-4">
+        <h2 class="h4 text-white mb-3">Topic quick links</h2>
+        <div class="d-flex flex-wrap gap-2">
+          <a href="{% url 'content:category_ai' %}" class="btn btn-outline-n2m">AI</a>
+          <a href="{% url 'content:category_startups' %}" class="btn btn-outline-n2m">Startups</a>
+          <a href="{% url 'content:review_list' %}" class="btn btn-outline-n2m">Reviews</a>
+          <a href="{% url 'content:post_list' %}?category=ai" class="btn btn-outline-n2m">Africa Tech</a>
+        </div>
+      </section>
+    </div>
+
+    <aside class="col-lg-4">
+      <section class="card card-n2m p-4 mb-4">
+        <h2 class="h5 text-white mb-3">Trending / Most read</h2>
+        <ul class="list-unstyled mb-0">
+          {% for post in trending %}
+          <li class="mb-3">
+            <a href="{{ post.get_absolute_url }}" class="text-decoration-none text-break">{{ post.title|truncatewords:6 }}</a>
+            <span class="text-muted small d-block">{{ post.views }} views</span>
+          </li>
+          {% empty %}
+          <li class="text-muted small">No views yet.</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section id="newsletter" class="card card-n2m p-4">
+        <h2 class="h5 text-white mb-3">Newsletter</h2>
+        <p class="small text-muted mb-3">Get the best of N2M in your inbox.</p>
+        <form action="{% url 'content:newsletter_signup' %}" method="post">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="email" name="email" class="form-control" placeholder="Your email" required>
+            <button type="submit" class="btn btn-n2m">Subscribe</button>
+          </div>
+        </form>
+      </section>
+    </aside>
+  </div>
+</div>
+{% endblock %}

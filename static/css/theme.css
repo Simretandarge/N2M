@@ -1,0 +1,198 @@
+/*
+  Next 251 Media (N2M) — theme.css
+  Brand palette and minimal overrides. Dark premium theme.
+*/
+:root {
+  --n2m-navy: #1F2A44;
+  --n2m-green: #2F7D32;
+  --n2m-bg: #121826;
+  --n2m-silver: #C7CBD6;
+  --n2m-white: #FFFFFF;
+}
+
+body {
+  background-color: var(--n2m-bg);
+  color: var(--n2m-silver);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Navbar: dark navy, silver links, green on hover/active */
+.navbar-n2m {
+  background-color: var(--n2m-navy) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.navbar-n2m .navbar-brand {
+  color: var(--n2m-silver) !important;
+  font-weight: 600;
+}
+
+/* Header logo: always display as circle, never rectangle */
+.logo-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logo-circle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.navbar-n2m .nav-link {
+  color: var(--n2m-silver) !important;
+}
+
+.navbar-n2m .nav-link:hover,
+.navbar-n2m .nav-link.active {
+  color: var(--n2m-green) !important;
+}
+
+.navbar-n2m .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--n2m-silver);
+}
+
+/* Buttons & CTAs: deep green */
+.btn-n2m,
+.btn-primary {
+  background-color: var(--n2m-green);
+  border-color: var(--n2m-green);
+  color: var(--n2m-white);
+}
+
+.btn-n2m:hover,
+.btn-primary:hover {
+  background-color: #266b29;
+  border-color: #266b29;
+  color: var(--n2m-white);
+}
+
+.btn-outline-n2m {
+  border-color: var(--n2m-green);
+  color: var(--n2m-green);
+}
+
+.btn-outline-n2m:hover {
+  background-color: var(--n2m-green);
+  color: var(--n2m-white);
+}
+
+/* Cards: dark surface, subtle border */
+.card-n2m {
+  background-color: var(--n2m-navy);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--n2m-silver);
+}
+
+.card-n2m .card-title a {
+  color: var(--n2m-silver);
+  text-decoration: none;
+}
+
+.card-n2m .card-title a:hover {
+  color: var(--n2m-green);
+}
+
+.card-n2m .card-text {
+  color: rgba(199, 203, 214, 0.85);
+}
+
+/* Links */
+a {
+  color: var(--n2m-green);
+}
+
+a:hover {
+  color: #3d9b40;
+}
+
+/* Badges */
+.badge-n2m {
+  background-color: var(--n2m-green);
+  color: var(--n2m-white);
+}
+
+/* Footer */
+.footer-n2m {
+  background-color: var(--n2m-navy);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--n2m-silver);
+}
+
+.footer-n2m a {
+  color: var(--n2m-silver);
+}
+
+.footer-n2m a:hover {
+  color: var(--n2m-green);
+}
+
+/* Form controls on dark */
+.form-control,
+.form-select {
+  background-color: rgba(31, 42, 68, 0.8);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--n2m-silver);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--n2m-navy);
+  border-color: var(--n2m-green);
+  color: var(--n2m-silver);
+  box-shadow: 0 0 0 0.2rem rgba(47, 125, 50, 0.25);
+}
+
+.form-control::placeholder {
+  color: rgba(199, 203, 214, 0.5);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--n2m-white);
+  font-weight: 600;
+}
+
+/* Hero */
+.hero-n2m {
+  background: linear-gradient(180deg, var(--n2m-navy) 0%, var(--n2m-bg) 100%);
+  color: var(--n2m-silver);
+}
+
+.hero-n2m .display-4,
+.hero-n2m .lead {
+  color: var(--n2m-silver);
+}
+
+/* Pagination */
+.page-link {
+  background-color: var(--n2m-navy);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--n2m-silver);
+}
+
+.page-link:hover {
+  background-color: var(--n2m-green);
+  border-color: var(--n2m-green);
+  color: var(--n2m-white);
+}
+
+.page-item.active .page-link {
+  background-color: var(--n2m-green);
+  border-color: var(--n2m-green);
+}
+
+.page-item.disabled .page-link {
+  background-color: var(--n2m-navy);
+  color: rgba(199, 203, 214, 0.5);
+}
