@@ -1,8 +1,8 @@
 """
-Forms: contact, newsletter signup.
+Forms: contact, newsletter signup, writer post/review create/edit.
 """
 from django import forms
-from .models import NewsletterSubscriber
+from .models import NewsletterSubscriber, Post, Category, Review
 
 
 class ContactForm(forms.Form):
@@ -32,3 +32,90 @@ class NewsletterForm(forms.ModelForm):
                 'placeholder': 'Enter your email',
             }),
         }
+
+
+class PostForm(forms.ModelForm):
+    """Writer-facing post create/edit form (no status, is_featured, or author)."""
+    class Meta:
+        model = Post
+        fields = ('title', 'slug', 'excerpt', 'content', 'featured_image', 'category')
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Post title',
+            }),
+            'slug': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'URL slug (leave blank to auto-generate)',
+            }),
+            'excerpt': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Short excerpt for listings',
+                'rows': 3,
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Full content',
+                'rows': 14,
+            }),
+            'featured_image': forms.FileInput(attrs={'class': 'form-control'}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].queryset = Category.objects.all().order_by('name')
+        self.fields['slug'].required = False
+
+
+class ReviewForm(forms.ModelForm):
+    """Writer-facing review create/edit form (no status or author)."""
+    class Meta:
+        model = Review
+        fields = ('title', 'slug', 'product_name', 'summary', 'content', 'rating', 'pros', 'cons', 'featured_image')
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Review title',
+            }),
+            'slug': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'URL slug (leave blank to auto-generate)',
+            }),
+            'product_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Product or service name',
+            }),
+            'summary': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Short summary',
+                'rows': 3,
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Full review content',
+                'rows': 12,
+            }),
+            'rating': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': '1–5 (optional)',
+                'min': 1,
+                'max': 5,
+            }),
+            'pros': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'One pro per line or comma-separated',
+                'rows': 3,
+            }),
+            'cons': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'One con per line or comma-separated',
+                'rows': 3,
+            }),
+            'featured_image': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['slug'].required = False
+        self.fields['rating'].required = False

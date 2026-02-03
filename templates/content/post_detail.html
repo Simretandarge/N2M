@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static content_extras %}
 
 {% block title %}{{ post.title }}{% endblock %}
 {% block meta_description %}{{ post.excerpt|truncatewords:30|default:post.content|truncatewords:30 }}{% endblock %}
@@ -20,7 +20,10 @@
   <header class="mb-4">
     {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none mb-2">{{ post.category.name }}</a>{% endif %}
     <h1 class="display-6 text-white mb-2">{{ post.title }}</h1>
-    <p class="text-muted">{{ post.published_at|date:"F j, Y" }} · {{ post.views }} views</p>
+    <p class="text-muted article-meta">
+      {{ post.published_at|date:"F j, Y" }} · {{ post.views }} views · <span class="reading-time">{{ post.content|reading_time }}</span>
+    </p>
+    {% include "content/partials/share_buttons.html" with share_url=share_url share_title=post.title %}
   </header>
 
   {% if post.featured_image %}
@@ -35,7 +38,7 @@
 
   {% if related %}
   <section class="mt-5 pt-4 border-top border-secondary">
-    <h2 class="h5 text-white mb-3">Related</h2>
+    <h2 class="n2m-section-title mb-3">Related</h2>
     <div class="row g-3">
       {% for p in related %}
       <div class="col-md-6">

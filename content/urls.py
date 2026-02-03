@@ -21,4 +21,11 @@ urlpatterns = [
     path('privacy/', views.privacy, name='privacy'),
     path('terms/', views.terms, name='terms'),
     path('robots.txt', views.robots_txt, name='robots_txt'),
+    # Writer interface (no Django admin)
+    path('writer/posts/', views.writer_post_list, name='writer_post_list'),
+    path('writer/posts/new/', views.writer_post_create, name='writer_post_create'),
+    path('writer/posts/<int:pk>/edit/', views.writer_post_edit, name='writer_post_edit'),
+    path('writer/reviews/', views.writer_review_list, name='writer_review_list'),
+    path('writer/reviews/new/', views.writer_review_create, name='writer_review_create'),
+    path('writer/reviews/<int:pk>/edit/', views.writer_review_edit, name='writer_review_edit'),
 ]

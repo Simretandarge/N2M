@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static content_extras %}
 
 {% block title %}{{ review.title }}{% endblock %}
 {% block meta_description %}{{ review.summary|truncatewords:30|default:review.content|truncatewords:30 }}{% endblock %}
@@ -19,7 +19,8 @@
   <header class="mb-4">
     {% if review.rating %}<span class="badge badge-n2m mb-2">{{ review.rating }}/5</span>{% endif %}
     <h1 class="display-6 text-white mb-2">{{ review.title }}</h1>
-    <p class="text-muted">Review of <strong>{{ review.product_name }}</strong> · {{ review.published_at|date:"F j, Y" }}</p>
+    <p class="text-muted article-meta">Review of <strong>{{ review.product_name }}</strong> · {{ review.published_at|date:"F j, Y" }} · <span class="reading-time">{{ review.content|reading_time }}</span></p>
+    {% include "content/partials/share_buttons.html" with share_url=share_url share_title=review.title %}
   </header>
 
   {% if review.featured_image %}
