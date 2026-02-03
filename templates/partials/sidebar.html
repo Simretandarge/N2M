@@ -1,0 +1,43 @@
+{% load static %}
+<aside class="n2m-sidebar card card-n2m p-4 mb-4 mb-lg-0">
+  {% if user.is_authenticated %}
+    <h6 class="text-white mb-3">{{ user_role_label }}</h6>
+    {% if user_role == 'admin' %}
+      <ul class="list-unstyled small mb-0">
+        <li class="mb-2"><a href="{% url 'accounts:dashboard_admin' %}">Admin dashboard</a></li>
+        <li class="mb-2"><a href="/admin/" target="_blank" rel="noopener">Django Admin</a></li>
+        <li class="mb-2"><a href="/admin/content/post/add/" target="_blank" rel="noopener">Add post</a></li>
+        <li class="mb-2"><a href="/admin/content/review/add/" target="_blank" rel="noopener">Add review</a></li>
+        <li class="mb-2"><a href="/admin/auth/user/" target="_blank" rel="noopener">Users</a></li>
+        <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+      </ul>
+    {% elif user_role == 'editor' %}
+      <ul class="list-unstyled small mb-0">
+        <li class="mb-2"><a href="{% url 'accounts:dashboard_editor' %}">Editor dashboard</a></li>
+        <li class="mb-2"><a href="/admin/content/post/" target="_blank" rel="noopener">All posts</a></li>
+        <li class="mb-2"><a href="/admin/content/review/" target="_blank" rel="noopener">All reviews</a></li>
+        <li class="mb-2"><a href="/admin/content/category/" target="_blank" rel="noopener">Categories</a></li>
+        <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+      </ul>
+    {% elif user_role == 'writer' %}
+      <ul class="list-unstyled small mb-0">
+        <li class="mb-2"><a href="{% url 'accounts:dashboard_writer' %}">Writer dashboard</a></li>
+        <li class="mb-2"><a href="{% url 'content:writer_post_create' %}">New post</a></li>
+        <li class="mb-2"><a href="{% url 'content:writer_post_list' %}">Your posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:writer_review_create' %}">New review</a></li>
+        <li class="mb-2"><a href="{% url 'content:writer_review_list' %}">Your reviews</a></li>
+        <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+      </ul>
+    {% else %}
+      <ul class="list-unstyled small mb-0">
+        <li class="mb-2"><a href="{% url 'accounts:dashboard_reader' %}">Dashboard</a></li>
+        <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+      </ul>
+    {% endif %}
+  {% else %}
+    <h6 class="text-white mb-3">Account</h6>
+    <p class="small text-muted mb-2">Sign in for your dashboard and profile.</p>
+    <a href="{% url 'accounts:login' %}" class="btn btn-n2m btn-sm w-100 mb-2">Sign in</a>
+    <a href="{% url 'accounts:signup' %}" class="btn btn-outline-n2m btn-sm w-100">Sign up</a>
+  {% endif %}
+</aside>

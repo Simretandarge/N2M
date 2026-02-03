@@ -1,0 +1,8 @@
+{% load static %}
+{% comment %}Expects: share_url, share_title, share_text (optional){% endcomment %}
+<div class="share-bar d-flex flex-wrap align-items-center gap-2 mb-3">
+  <span class="text-muted small me-1">Share:</span>
+  <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ share_title|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-n2m btn-sm share-btn" title="Share on X">X</a>
+  <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-n2m btn-sm share-btn" title="Share on LinkedIn">LinkedIn</a>
+  <button type="button" class="btn btn-outline-n2m btn-sm share-btn copy-link-btn" data-url="{{ share_url }}" title="Copy link">Copy link</button>
+</div>
