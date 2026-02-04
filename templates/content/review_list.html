@@ -7,8 +7,27 @@
 <div class="container">
   <header class="mb-4">
     <h1 class="h2 text-white mb-2">Reviews</h1>
-    <p class="text-muted">Product and service reviews with pros, cons, and verdicts.</p>
+    <p class="text-muted">All reviews, filtered by rating or search.</p>
   </header>
+
+  <div class="row mb-4">
+    <div class="col-md-4 mb-2 mb-md-0">
+      <form action="{% url 'content:review_list' %}" method="get" class="d-flex gap-2">
+        <input type="hidden" name="rating" value="{{ rating_filter }}">
+        <input class="form-control" type="search" name="q" placeholder="Search…" value="{{ q }}">
+        <button class="btn btn-n2m" type="submit">Search</button>
+      </form>
+    </div>
+    <div class="col-md-8">
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <span class="text-muted small">Rating:</span>
+        <a href="{% url 'content:review_list' %}{% if q %}?q={{ q|urlencode }}{% endif %}" class="btn btn-sm {% if not rating_filter %}btn-n2m{% else %}btn-outline-n2m{% endif %}">All</a>
+        <a href="{% url 'content:review_list' %}?rating=5{% if q %}&q={{ q|urlencode }}{% endif %}" class="btn btn-sm {% if rating_filter == '5' %}btn-n2m{% else %}btn-outline-n2m{% endif %}">5</a>
+        <a href="{% url 'content:review_list' %}?rating=4{% if q %}&q={{ q|urlencode }}{% endif %}" class="btn btn-sm {% if rating_filter == '4' %}btn-n2m{% else %}btn-outline-n2m{% endif %}">4+</a>
+        <a href="{% url 'content:review_list' %}?rating=3{% if q %}&q={{ q|urlencode }}{% endif %}" class="btn btn-sm {% if rating_filter == '3' %}btn-n2m{% else %}btn-outline-n2m{% endif %}">3+</a>
+      </div>
+    </div>
+  </div>
 
   <div class="row g-4">
     {% for review in page_obj %}
@@ -38,11 +57,11 @@
   <nav class="mt-4 d-flex justify-content-center">
     <ul class="pagination">
       {% if page_obj.has_previous %}
-      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}">Previous</a></li>
       {% endif %}
       <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
       {% if page_obj.has_next %}
-      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if rating_filter %}&rating={{ rating_filter }}{% endif %}">Next</a></li>
       {% endif %}
     </ul>
   </nav>

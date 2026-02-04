@@ -28,4 +28,17 @@ urlpatterns = [
     path('writer/reviews/', views.writer_review_list, name='writer_review_list'),
     path('writer/reviews/new/', views.writer_review_create, name='writer_review_create'),
     path('writer/reviews/<int:pk>/edit/', views.writer_review_edit, name='writer_review_edit'),
+    # CMS: editor/admin manage posts, reviews, categories (in-site)
+    path('manage/posts/', views.manage_post_list, name='manage_post_list'),
+    path('manage/posts/new/', views.manage_post_create, name='manage_post_create'),
+    path('manage/posts/<int:pk>/edit/', views.manage_post_edit, name='manage_post_edit'),
+    path('manage/posts/<int:pk>/delete/', views.manage_post_delete, name='manage_post_delete'),
+    path('manage/reviews/', views.manage_review_list, name='manage_review_list'),
+    path('manage/reviews/new/', views.manage_review_create, name='manage_review_create'),
+    path('manage/reviews/<int:pk>/edit/', views.manage_review_edit, name='manage_review_edit'),
+    path('manage/reviews/<int:pk>/delete/', views.manage_review_delete, name='manage_review_delete'),
+    path('manage/categories/', views.manage_category_list, name='manage_category_list'),
+    path('manage/categories/new/', views.manage_category_create, name='manage_category_create'),
+    path('manage/categories/<int:pk>/edit/', views.manage_category_edit, name='manage_category_edit'),
+    path('manage/categories/<int:pk>/delete/', views.manage_category_delete, name='manage_category_delete'),
 ]

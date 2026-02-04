@@ -93,6 +93,25 @@
     navScroll();
   }
 
+  // Row 2: hide when scrolling down, show when scrolling up
+  var row2 = document.querySelector('.navbar-n2m-bbc .navbar-n2m-container > .n2m-nav-row2');
+  if (row2) {
+    var lastScrollY = window.scrollY;
+    var threshold = 10;
+    function onScrollRow2() {
+      var current = window.scrollY;
+      if (current <= 60) {
+        row2.classList.remove('n2m-nav-row2-hidden');
+      } else if (current > lastScrollY + threshold) {
+        row2.classList.add('n2m-nav-row2-hidden');
+      } else if (current < lastScrollY - threshold) {
+        row2.classList.remove('n2m-nav-row2-hidden');
+      }
+      lastScrollY = current;
+    }
+    window.addEventListener('scroll', onScrollRow2, { passive: true });
+  }
+
   // Copy link buttons: copy URL and show toast
   document.querySelectorAll('.copy-link-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {

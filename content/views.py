@@ -4,12 +4,20 @@ Views for Next 251 Media: home, articles, category hubs, reviews, about, contact
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Category, Post, Review
-from .forms import ContactForm, NewsletterForm, PostForm, ReviewForm
+from .forms import (
+    ContactForm,
+    NewsletterForm,
+    PostForm,
+    ReviewForm,
+    PostFormEditor,
+    ReviewFormEditor,
+    CategoryForm,
+)
 
 
 def _published_posts():
@@ -46,11 +54,14 @@ def home(request):
 
 
 def post_list(request):
-    """Articles list with category filter, search, pagination."""
+    """Articles list with category filter, search (all categories + by category name), pagination."""
     posts = _published_posts()
     q = request.GET.get('q', '').strip()
     if q:
-        posts = posts.filter(Q(title__icontains=q) | Q(content__icontains=q) | Q(excerpt__icontains=q))
+        # Search in title, excerpt, content, and category name (so "AI" or "Startups" finds that category's posts)
+        posts = posts.filter(
+            Q(title__icontains=q) | Q(content__icontains=q) | Q(excerpt__icontains=q) | Q(category__name__icontains=q)
+        )
     cat_slug = request.GET.get('category', '')
     if cat_slug:
         posts = posts.filter(category__slug=cat_slug)
@@ -97,12 +108,26 @@ def category_detail(request, slug):
 
 
 def review_list(request):
-    """Reviews list with pagination."""
+    """Reviews list with search, optional rating filter, and pagination."""
     reviews = _published_reviews()
+    q = request.GET.get('q', '').strip()
+    if q:
+        reviews = reviews.filter(
+            Q(title__icontains=q) | Q(product_name__icontains=q) | Q(summary__icontains=q) | Q(content__icontains=q)
+        )
+    rating_filter = request.GET.get('rating', '')
+    if rating_filter and rating_filter.isdigit():
+        min_rating = int(rating_filter)
+        if 1 <= min_rating <= 5:
+            reviews = reviews.filter(rating__gte=min_rating)
     paginator = Paginator(reviews, 12)
     page = request.GET.get('page', 1)
     page_obj = paginator.get_page(page)
-    return render(request, 'content/review_list.html', {'page_obj': page_obj})
+    return render(request, 'content/review_list.html', {
+        'page_obj': page_obj,
+        'q': q,
+        'rating_filter': rating_filter,
+    })
 
 
 def review_detail(request, slug):
@@ -294,3 +319,300 @@ def writer_review_edit(request, pk):
     else:
         form = ReviewForm(instance=review)
     return render(request, 'content/writer/review_form.html', {'form': form, 'review': review})
+
+
+# ----- CMS: Editor/Admin manage all posts, reviews, categories (in-site, no Django admin) -----
+
+def _user_is_editor_or_admin(user):
+    """User is superuser or in Editors group."""
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name='Editors').exists()
+
+
+def _cms_redirect(request):
+    """Redirect non-editor/admin away from CMS views."""
+    from django.urls import reverse as rev
+    if request.user.is_superuser:
+        return redirect(rev('accounts:dashboard_admin'))
+    if request.user.groups.filter(name='Writers').exists():
+        return redirect(rev('accounts:dashboard_writer'))
+    return redirect(rev('accounts:login'))
+
+
+@login_required
+def manage_post_list(request):
+    """List all posts (editor/admin). Filter by status, featured, and mine (what I wrote or published)."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    qs = Post.objects.select_related('category', 'author', 'published_by').order_by('-updated_at')
+    status_filter = request.GET.get('status', '')
+    featured_filter = request.GET.get('featured', '')
+    mine_filter = request.GET.get('mine', '')
+    if status_filter in ('draft', 'published'):
+        qs = qs.filter(status=status_filter)
+    if featured_filter == '1':
+        qs = qs.filter(is_featured=True)
+    if mine_filter == '1':
+        qs = qs.filter(Q(author=request.user) | Q(published_by=request.user))
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+    return render(request, 'content/cms/post_list.html', {
+        'page_obj': page_obj,
+        'status_filter': status_filter,
+        'featured_filter': featured_filter,
+        'mine_filter': mine_filter,
+    })
+
+
+@login_required
+def manage_post_create(request):
+    """Create a new post (editor/admin). Editors cannot self-publish; only another editor or admin can approve."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    if request.method == 'POST':
+        form = PostFormEditor(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            # Editors cannot publish their own content; must be approved by another editor or admin
+            if not request.user.is_superuser and post.status == 'published':
+                post.status = 'draft'
+                post.published_at = None
+                post.published_by = None
+                messages.info(request, 'Saved as draft. Another editor or admin must approve and publish it.')
+            elif post.status == 'published':
+                if not post.published_at:
+                    post.published_at = timezone.now()
+                post.published_by = request.user
+            post.save()
+            if request.user.is_superuser or post.status == 'published':
+                messages.success(request, 'Post created.')
+            return redirect('content:manage_post_list')
+    else:
+        form = PostFormEditor(initial={'status': 'draft'})
+    editor_cannot_self_publish = not request.user.is_superuser
+    if editor_cannot_self_publish:
+        form.fields['status'].choices = [('draft', 'Draft')]
+    return render(request, 'content/cms/post_form.html', {
+        'form': form, 'post': None, 'editor_cannot_self_publish': editor_cannot_self_publish,
+    })
+
+
+@login_required
+def manage_post_edit(request, pk):
+    """Edit any post (editor/admin). Editors cannot publish their own; only another editor or admin can approve."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    post = get_object_or_404(Post.objects.select_related('category', 'author'), pk=pk)
+    if request.method == 'POST':
+        form = PostFormEditor(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            is_own = post.author_id == request.user.pk
+            # Editors cannot publish their own content
+            if not request.user.is_superuser and is_own and post.status == 'published':
+                post.status = 'draft'
+                post.published_at = None
+                post.published_by = None
+                messages.info(request, 'Your own posts must be approved by another editor or admin. Saved as draft.')
+            elif post.status == 'published':
+                if not post.published_at:
+                    post.published_at = timezone.now()
+                post.published_by = request.user
+            post.save()
+            if not (not request.user.is_superuser and is_own and form.cleaned_data.get('status') == 'published'):
+                messages.success(request, 'Post updated.')
+            return redirect('content:manage_post_list')
+    else:
+        form = PostFormEditor(instance=post)
+    editor_cannot_self_publish = not request.user.is_superuser and post.author_id == request.user.pk
+    if editor_cannot_self_publish:
+        form.fields['status'].choices = [('draft', 'Draft')]
+    return render(request, 'content/cms/post_form.html', {
+        'form': form, 'post': post, 'editor_cannot_self_publish': editor_cannot_self_publish,
+    })
+
+
+@login_required
+def manage_post_delete(request, pk):
+    """Delete a post. Admin can always delete. Editor can delete drafts or content they themselves published."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    post = get_object_or_404(Post, pk=pk)
+    if post.status == 'published' and not request.user.is_superuser:
+        if post.published_by_id != request.user.pk:
+            messages.error(request, 'Only the admin or the person who published this can delete it. Ask an admin to delete.')
+            return redirect('content:manage_post_list')
+    if request.method == 'POST':
+        title = post.title
+        post.delete()
+        messages.success(request, f'Post "{title}" deleted.')
+        return redirect('content:manage_post_list')
+    return render(request, 'content/cms/post_confirm_delete.html', {'post': post})
+
+
+@login_required
+def manage_review_list(request):
+    """List all reviews (editor/admin). Filter by status and mine (what I wrote or published)."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    qs = Review.objects.select_related('author', 'published_by').order_by('-updated_at')
+    status_filter = request.GET.get('status', '')
+    mine_filter = request.GET.get('mine', '')
+    if status_filter in ('draft', 'published'):
+        qs = qs.filter(status=status_filter)
+    if mine_filter == '1':
+        qs = qs.filter(Q(author=request.user) | Q(published_by=request.user))
+    paginator = Paginator(qs, 20)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+    return render(request, 'content/cms/review_list.html', {
+        'page_obj': page_obj,
+        'status_filter': status_filter,
+        'mine_filter': mine_filter,
+    })
+
+
+@login_required
+def manage_review_create(request):
+    """Create a new review (editor/admin). Editors cannot self-publish; only another editor or admin can approve."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    if request.method == 'POST':
+        form = ReviewFormEditor(request.POST, request.FILES)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.author = request.user
+            if not request.user.is_superuser and review.status == 'published':
+                review.status = 'draft'
+                review.published_at = None
+                review.published_by = None
+                messages.info(request, 'Saved as draft. Another editor or admin must approve and publish it.')
+            elif review.status == 'published':
+                if not review.published_at:
+                    review.published_at = timezone.now()
+                review.published_by = request.user
+            review.save()
+            if request.user.is_superuser or review.status == 'published':
+                messages.success(request, 'Review created.')
+            return redirect('content:manage_review_list')
+    else:
+        form = ReviewFormEditor(initial={'status': 'draft'})
+    editor_cannot_self_publish = not request.user.is_superuser
+    if editor_cannot_self_publish:
+        form.fields['status'].choices = [('draft', 'Draft')]
+    return render(request, 'content/cms/review_form.html', {
+        'form': form, 'review': None, 'editor_cannot_self_publish': editor_cannot_self_publish,
+    })
+
+
+@login_required
+def manage_review_edit(request, pk):
+    """Edit any review (editor/admin). Editors cannot publish their own; only another editor or admin can approve."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    review = get_object_or_404(Review, pk=pk)
+    if request.method == 'POST':
+        form = ReviewFormEditor(request.POST, request.FILES, instance=review)
+        if form.is_valid():
+            review = form.save(commit=False)
+            is_own = review.author_id == request.user.pk
+            if not request.user.is_superuser and is_own and review.status == 'published':
+                review.status = 'draft'
+                review.published_at = None
+                review.published_by = None
+                messages.info(request, 'Your own reviews must be approved by another editor or admin. Saved as draft.')
+            elif review.status == 'published':
+                if not review.published_at:
+                    review.published_at = timezone.now()
+                review.published_by = request.user
+            review.save()
+            if not (not request.user.is_superuser and is_own and form.cleaned_data.get('status') == 'published'):
+                messages.success(request, 'Review updated.')
+            return redirect('content:manage_review_list')
+    else:
+        form = ReviewFormEditor(instance=review)
+    editor_cannot_self_publish = not request.user.is_superuser and review.author_id == request.user.pk
+    if editor_cannot_self_publish:
+        form.fields['status'].choices = [('draft', 'Draft')]
+    return render(request, 'content/cms/review_form.html', {
+        'form': form, 'review': review, 'editor_cannot_self_publish': editor_cannot_self_publish,
+    })
+
+
+@login_required
+def manage_review_delete(request, pk):
+    """Delete a review. Admin can always delete. Editor can delete drafts or content they themselves published."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    review = get_object_or_404(Review, pk=pk)
+    if review.status == 'published' and not request.user.is_superuser:
+        if review.published_by_id != request.user.pk:
+            messages.error(request, 'Only the admin or the person who published this can delete it. Ask an admin to delete.')
+            return redirect('content:manage_review_list')
+    if request.method == 'POST':
+        title = review.title
+        review.delete()
+        messages.success(request, f'Review "{title}" deleted.')
+        return redirect('content:manage_review_list')
+    return render(request, 'content/cms/review_confirm_delete.html', {'review': review})
+
+
+@login_required
+def manage_category_list(request):
+    """List all categories (editor/admin)."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    categories = Category.objects.annotate(
+        post_count=Count('posts'),
+    ).order_by('name')
+    return render(request, 'content/cms/category_list.html', {'categories': categories})
+
+
+@login_required
+def manage_category_create(request):
+    """Create a category (editor/admin)."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category created.')
+            return redirect('content:manage_category_list')
+    else:
+        form = CategoryForm()
+    return render(request, 'content/cms/category_form.html', {'form': form, 'category': None})
+
+
+@login_required
+def manage_category_edit(request, pk):
+    """Edit a category (editor/admin)."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category updated.')
+            return redirect('content:manage_category_list')
+    else:
+        form = CategoryForm(instance=category)
+    return render(request, 'content/cms/category_form.html', {'form': form, 'category': category})
+
+
+@login_required
+def manage_category_delete(request, pk):
+    """Delete a category (editor/admin)."""
+    if not _user_is_editor_or_admin(request.user):
+        return _cms_redirect(request)
+    category = get_object_or_404(Category, pk=pk)
+    if request.method == 'POST':
+        name = category.name
+        category.delete()
+        messages.success(request, f'Category "{name}" deleted.')
+        return redirect('content:manage_category_list')
+    return render(request, 'content/cms/category_confirm_delete.html', {'category': category})

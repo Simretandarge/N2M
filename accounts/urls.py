@@ -28,4 +28,11 @@ urlpatterns = [
     path('editor/applications/', views.editor_applications_list, name='editor_applications_list'),
     path('editor/applications/<int:pk>/approve/', views.editor_application_approve, name='editor_application_approve'),
     path('editor/applications/<int:pk>/reject/', views.editor_application_reject, name='editor_application_reject'),
+    path('review-drafts/', views.review_drafts, name='review_drafts'),
+    path('review-drafts/post/<int:pk>/publish/', views.review_drafts_publish_post, name='review_drafts_publish_post'),
+    path('review-drafts/post/<int:pk>/reject/', views.review_drafts_reject_post, name='review_drafts_reject_post'),
+    path('review-drafts/review/<int:pk>/publish/', views.review_drafts_publish_review, name='review_drafts_publish_review'),
+    path('review-drafts/review/<int:pk>/reject/', views.review_drafts_reject_review, name='review_drafts_reject_review'),
+    path('users/', views.user_list, name='user_list'),
+    path('users/<int:pk>/edit/', views.user_edit, name='user_edit'),
 ]

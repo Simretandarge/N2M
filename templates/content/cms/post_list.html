@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage posts{% endblock %}
+{% block meta_description %}Manage all posts.{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <h1 class="h2 text-white mb-0">Manage posts</h1>
+    <div class="d-flex gap-2">
+      <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-n2m">← Dashboard</a>
+      <a href="{% url 'content:manage_post_create' %}" class="btn btn-n2m">New post</a>
+    </div>
+  </div>
+
+  <p class="text-muted small mb-3">Featured posts appear as the <strong>Featured story</strong> on the homepage. Set the &quot;Featured&quot; checkbox when editing a post. Use <strong>My posts</strong> to see only what you wrote or published.</p>
+  <div class="mb-3">
+    <a href="{% url 'content:manage_post_list' %}" class="btn btn-sm {% if not status_filter and not featured_filter and not mine_filter %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">All</a>
+    <a href="{% url 'content:manage_post_list' %}?mine=1" class="btn btn-sm {% if mine_filter == '1' %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">My posts</a>
+    <a href="{% url 'content:manage_post_list' %}?status=draft{% if mine_filter %}&mine=1{% endif %}" class="btn btn-sm {% if status_filter == 'draft' %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">Drafts</a>
+    <a href="{% url 'content:manage_post_list' %}?status=published{% if mine_filter %}&mine=1{% endif %}" class="btn btn-sm {% if status_filter == 'published' %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">Published</a>
+    <a href="{% url 'content:manage_post_list' %}?featured=1{% if mine_filter %}&mine=1{% endif %}" class="btn btn-sm {% if featured_filter == '1' %}btn-n2m{% else %}btn-outline-n2m{% endif %}">Featured</a>
+  </div>
+
+  <div class="card card-n2m p-4">
+    {% if page_obj %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Featured</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in page_obj %}
+          <tr>
+            <td><strong>{{ post.title|truncatewords:8 }}</strong></td>
+            <td>{{ post.author.get_username|default:"—" }}</td>
+            <td>{% if post.category %}{{ post.category.name }}{% else %}—{% endif %}</td>
+            <td><span class="badge {% if post.status == 'published' %}bg-success{% else %}bg-secondary{% endif %}">{{ post.status }}</span></td>
+            <td>{% if post.is_featured %}<span class="badge bg-warning text-dark">Yes</span>{% else %}—{% endif %}</td>
+            <td>{{ post.updated_at|date:"M j, Y" }}</td>
+            <td>
+              <a href="{% url 'content:manage_post_edit' post.pk %}" class="btn btn-sm btn-outline-n2m me-1">Edit</a>
+              {% if post.status == 'published' %}
+                {% if request.user.is_superuser or post.published_by_id == request.user.pk %}
+              <a href="{{ post.get_absolute_url }}" class="btn btn-sm btn-outline-n2m me-1" target="_blank" rel="noopener">View</a>
+                {% else %}
+              <span class="text-muted" title="Published by admin — ask admin to manage">—</span>
+                {% endif %}
+              {% endif %}
+              {% if post.status != 'published' %}
+              <a href="{% url 'content:manage_post_delete' post.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+              {% else %}
+                {% if request.user.is_superuser or post.published_by_id == request.user.pk %}
+              <a href="{% url 'content:manage_post_delete' post.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                {% else %}
+              <span class="text-muted" title="Published by admin — ask admin to delete">—</span>
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <nav class="mt-4 d-flex justify-content-center">
+      {% if page_obj.has_other_pages %}
+      <ul class="pagination pagination-n2m mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if featured_filter %}&featured={{ featured_filter }}{% endif %}{% if mine_filter %}&mine={{ mine_filter }}{% endif %}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if featured_filter %}&featured={{ featured_filter }}{% endif %}{% if mine_filter %}&mine={{ mine_filter }}{% endif %}">Next</a></li>
+        {% endif %}
+      </ul>
+      {% endif %}
+    </nav>
+    {% else %}
+    <p class="text-muted mb-0">No posts yet. <a href="{% url 'content:manage_post_create' %}">Create one</a>.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

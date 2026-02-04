@@ -1,4 +1,6 @@
 {% load static %}
+{% if not user.is_authenticated %}
+{# Guests: show site navigation #}
 <h6 class="n2m-menu-title text-uppercase mb-3">Content</h6>
 <ul class="list-unstyled n2m-menu-list mb-4">
   <li><a href="{% url 'content:home' %}">Home</a></li>
@@ -13,6 +15,51 @@
   <li><a href="{% url 'content:about' %}">About</a></li>
   <li><a href="{% url 'content:contact' %}">Contact</a></li>
 </ul>
+{% else %}
+{# Logged in: show only this user's role section #}
+<h6 class="n2m-menu-title text-uppercase mb-3">{{ user_role_label }}</h6>
+{% if user_role == 'admin' %}
+<ul class="list-unstyled n2m-menu-list mb-4">
+  <li><a href="{% url 'accounts:dashboard_admin' %}">Admin dashboard</a></li>
+  <li><a href="{% url 'content:manage_post_list' %}?mine=1">My posts</a></li>
+  <li><a href="{% url 'content:manage_review_list' %}?mine=1">My reviews</a></li>
+  <li><a href="{% url 'accounts:review_drafts' %}">Review drafts</a></li>
+  <li><a href="{% url 'content:manage_post_list' %}">All posts</a></li>
+  <li><a href="{% url 'content:manage_review_list' %}">All reviews</a></li>
+  <li><a href="{% url 'content:manage_category_list' %}">Categories</a></li>
+  <li><a href="{% url 'accounts:user_list' %}">Manage users</a></li>
+  <li><a href="{% url 'accounts:editor_applications_list' %}">Editor applications</a></li>
+  <li><a href="/admin/" target="_blank" rel="noopener">Open Django Admin</a></li>
+  <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+</ul>
+{% elif user_role == 'editor' %}
+<ul class="list-unstyled n2m-menu-list mb-4">
+  <li><a href="{% url 'accounts:dashboard_editor' %}">Editor dashboard</a></li>
+  <li><a href="{% url 'content:manage_post_list' %}?mine=1">My posts</a></li>
+  <li><a href="{% url 'content:manage_review_list' %}?mine=1">My reviews</a></li>
+  <li><a href="{% url 'accounts:review_drafts' %}">Review drafts</a></li>
+  <li><a href="{% url 'content:manage_post_list' %}">All posts</a></li>
+  <li><a href="{% url 'content:manage_review_list' %}">All reviews</a></li>
+  <li><a href="{% url 'content:manage_category_list' %}">Categories</a></li>
+  <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+</ul>
+{% elif user_role == 'writer' %}
+<ul class="list-unstyled n2m-menu-list mb-4">
+  <li><a href="{% url 'accounts:dashboard_writer' %}">Writer dashboard</a></li>
+  <li><a href="{% url 'content:writer_post_create' %}">New post</a></li>
+  <li><a href="{% url 'content:writer_post_list' %}">Your posts</a></li>
+  <li><a href="{% url 'content:writer_review_create' %}">New review</a></li>
+  <li><a href="{% url 'content:writer_review_list' %}">Your reviews</a></li>
+  <li><a href="{% url 'accounts:editor_apply' %}">Apply to be an editor</a></li>
+  <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+</ul>
+{% else %}
+<ul class="list-unstyled n2m-menu-list mb-4">
+  <li><a href="{% url 'accounts:dashboard_reader' %}">Dashboard</a></li>
+  <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+</ul>
+{% endif %}
+{% endif %}
 
 <div class="n2m-sidebar-theme d-flex justify-content-end align-items-center mb-4">
   <span class="n2m-menu-title text-uppercase me-2 small">Theme</span>
@@ -25,40 +72,3 @@
     </span>
   </button>
 </div>
-
-{% if user.is_authenticated %}
-<h6 class="n2m-menu-title text-uppercase mb-3">{{ user_role_label }}</h6>
-{% if user_role == 'admin' %}
-<ul class="list-unstyled n2m-menu-list mb-0">
-  <li><a href="{% url 'accounts:dashboard_admin' %}">Admin dashboard</a></li>
-  <li><a href="/admin/" target="_blank" rel="noopener">Django Admin</a></li>
-  <li><a href="/admin/content/post/add/" target="_blank" rel="noopener">Add post</a></li>
-  <li><a href="/admin/content/review/add/" target="_blank" rel="noopener">Add review</a></li>
-  <li><a href="/admin/auth/user/" target="_blank" rel="noopener">Users</a></li>
-  <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
-</ul>
-{% elif user_role == 'editor' %}
-<ul class="list-unstyled n2m-menu-list mb-0">
-  <li><a href="{% url 'accounts:dashboard_editor' %}">Editor dashboard</a></li>
-  <li><a href="/admin/content/post/" target="_blank" rel="noopener">All posts</a></li>
-  <li><a href="/admin/content/review/" target="_blank" rel="noopener">All reviews</a></li>
-  <li><a href="/admin/content/category/" target="_blank" rel="noopener">Categories</a></li>
-  <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
-</ul>
-{% elif user_role == 'writer' %}
-<ul class="list-unstyled n2m-menu-list mb-0">
-  <li><a href="{% url 'accounts:dashboard_writer' %}">Writer dashboard</a></li>
-  <li><a href="{% url 'content:writer_post_create' %}">New post</a></li>
-  <li><a href="{% url 'content:writer_post_list' %}">Your posts</a></li>
-  <li><a href="{% url 'content:writer_review_create' %}">New review</a></li>
-  <li><a href="{% url 'content:writer_review_list' %}">Your reviews</a></li>
-  <li><a href="{% url 'accounts:editor_apply' %}">Apply to be an editor</a></li>
-  <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
-</ul>
-{% else %}
-<ul class="list-unstyled n2m-menu-list mb-0">
-  <li><a href="{% url 'accounts:dashboard_reader' %}">Dashboard</a></li>
-  <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
-</ul>
-{% endif %}
-{% endif %}

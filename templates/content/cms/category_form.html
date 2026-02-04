@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if category %}Edit category{% else %}New category{% endif %}{% endblock %}
+{% block meta_description %}{% if category %}Edit category.{% else %}Create a new category.{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <header class="mb-4">
+    <h1 class="h2 text-white mb-1">{% if category %}Edit category{% else %}New category{% endif %}</h1>
+  </header>
+
+  <div class="row">
+    <div class="col-lg-6">
+      <form method="post" action="{% if category %}{% url 'content:manage_category_edit' category.pk %}{% else %}{% url 'content:manage_category_create' %}{% endif %}" class="card card-n2m p-4">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="mb-3">
+          <label for="id_name" class="form-label text-white">Name</label>
+          {{ form.name }}
+          {% if form.name.errors %}<div class="form-text text-danger">{{ form.name.errors }}</div>{% endif %}
+        </div>
+        <div class="mb-4">
+          <label for="id_slug" class="form-label text-white">URL slug (optional)</label>
+          {{ form.slug }}
+          <div class="form-text text-muted">Leave blank to generate from name.</div>
+          {% if form.slug.errors %}<div class="form-text text-danger">{{ form.slug.errors }}</div>{% endif %}
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-n2m">Save</button>
+          <a href="{% url 'content:manage_category_list' %}" class="btn btn-outline-n2m">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <p class="mt-3 mb-0"><a href="{% url 'content:manage_category_list' %}" class="text-muted small">← Back to categories</a></p>
+</div>
+{% endblock %}

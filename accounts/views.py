@@ -19,8 +19,11 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.utils import timezone
 
-from .forms import SignUpForm, ProfileForm, EditorApplicationForm
+from django.contrib.auth import get_user_model
+from .forms import SignUpForm, ProfileForm, EditorApplicationForm, UserEditForm
 from .models import EditorApplication
+
+User = get_user_model()
 
 
 def _user_role(user):
@@ -277,3 +280,119 @@ def editor_application_reject(request, pk):
     application.save()
     messages.success(request, 'Application rejected.')
     return redirect('accounts:editor_applications_list')
+
+
+# ----- Review drafts: editors/admins publish or reject writers' drafts -----
+
+def _user_can_review_drafts(user):
+    """Editors and admins can review and publish/reject drafts."""
+    return user.is_authenticated and (
+        user.is_superuser or user.groups.filter(name='Editors').exists()
+    )
+
+
+@login_required
+def review_drafts(request):
+    """List draft posts and reviews for editors/admins to publish or reject."""
+    if not _user_can_review_drafts(request.user):
+        return _redirect_to_role_dashboard(request.user)
+    from content.models import Post, Review
+    draft_posts = Post.objects.filter(status='draft').select_related('author', 'category').order_by('-updated_at')
+    draft_reviews = Review.objects.filter(status='draft').select_related('author').order_by('-updated_at')
+    return render(request, 'accounts/review_drafts.html', {
+        'draft_posts': draft_posts,
+        'draft_reviews': draft_reviews,
+    })
+
+
+@login_required
+def review_drafts_publish_post(request, pk):
+    """Approve and publish a draft post. Editors cannot publish their own; only another editor or admin can."""
+    if not _user_can_review_drafts(request.user):
+        return _redirect_to_role_dashboard(request.user)
+    from content.models import Post
+    post = get_object_or_404(Post, pk=pk)
+    if post.status != 'draft':
+        messages.warning(request, 'This post is already published.')
+        return redirect('accounts:review_drafts')
+    if not request.user.is_superuser and post.author_id == request.user.pk:
+        messages.error(request, 'You cannot publish your own content. Another editor or admin must approve it.')
+        return redirect('accounts:review_drafts')
+    post.status = 'published'
+    post.published_by = request.user
+    post.save()
+    messages.success(request, f'"{post.title}" is now published.')
+    return redirect('accounts:review_drafts')
+
+
+@login_required
+def review_drafts_reject_post(request, pk):
+    """Reject a draft post — leave as draft (editor/admin only)."""
+    if not _user_can_review_drafts(request.user):
+        return _redirect_to_role_dashboard(request.user)
+    from content.models import Post
+    post = get_object_or_404(Post, pk=pk)
+    messages.info(request, f'"{post.title}" left as draft. Writer can edit and resubmit.')
+    return redirect('accounts:review_drafts')
+
+
+@login_required
+def review_drafts_publish_review(request, pk):
+    """Approve and publish a draft review. Editors cannot publish their own; only another editor or admin can."""
+    if not _user_can_review_drafts(request.user):
+        return _redirect_to_role_dashboard(request.user)
+    from content.models import Review
+    review = get_object_or_404(Review, pk=pk)
+    if review.status != 'draft':
+        messages.warning(request, 'This review is already published.')
+        return redirect('accounts:review_drafts')
+    if not request.user.is_superuser and review.author_id == request.user.pk:
+        messages.error(request, 'You cannot publish your own content. Another editor or admin must approve it.')
+        return redirect('accounts:review_drafts')
+    review.status = 'published'
+    review.published_by = request.user
+    review.save()
+    messages.success(request, f'"{review.title}" is now published.')
+    return redirect('accounts:review_drafts')
+
+
+@login_required
+def review_drafts_reject_review(request, pk):
+    """Reject a draft review — leave as draft (editor/admin only)."""
+    if not _user_can_review_drafts(request.user):
+        return _redirect_to_role_dashboard(request.user)
+    from content.models import Review
+    review = get_object_or_404(Review, pk=pk)
+    messages.info(request, f'"{review.title}" left as draft. Writer can edit and resubmit.')
+    return redirect('accounts:review_drafts')
+
+
+# ----- User management (admin only, in-site) -----
+
+@login_required
+def user_list(request):
+    """List all users (admin/superuser only)."""
+    if not request.user.is_superuser:
+        return redirect('accounts:dashboard')
+    from django.core.paginator import Paginator
+    users = User.objects.all().order_by('-date_joined')
+    paginator = Paginator(users, 25)
+    page_obj = paginator.get_page(request.GET.get('page', 1))
+    return render(request, 'accounts/user_list.html', {'page_obj': page_obj})
+
+
+@login_required
+def user_edit(request, pk):
+    """Edit a user: profile, is_active, groups (admin only)."""
+    if not request.user.is_superuser:
+        return redirect('accounts:dashboard')
+    user = get_object_or_404(User, pk=pk)
+    if request.method == 'POST':
+        form = UserEditForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'User "{user.username}" updated.')
+            return redirect('accounts:user_list')
+    else:
+        form = UserEditForm(instance=user)
+    return render(request, 'accounts/user_edit.html', {'form': form, 'edit_user': user})

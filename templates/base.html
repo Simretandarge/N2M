@@ -20,11 +20,11 @@
   {% block head_extra %}{% endblock %}
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-n2m navbar-n2m-bbc sticky-top" id="mainNav" aria-label="Main navigation">
+  <nav class="navbar navbar-expand-lg navbar-n2m navbar-n2m-bbc" id="mainNav" aria-label="Main navigation">
     <div class="navbar-n2m-accent" aria-hidden="true"></div>
     <div class="container-fluid navbar-n2m-container">
-      <!-- Row 1: Menu (left) | Logo (center) | Account (right) — BBC-style -->
-      <div class="n2m-nav-row1 d-flex align-items-center justify-content-between">
+      <!-- Row 1: Menu (left) | Logo (center) | Account (right) — always visible -->
+      <div class="n2m-nav-row1 d-flex align-items-center justify-content-between" style="display: flex !important; min-height: 56px; visibility: visible !important;">
         <div class="n2m-nav-left d-flex align-items-center">
           <button type="button" class="btn btn-n2m-menu d-flex align-items-center justify-content-center" data-bs-toggle="offcanvas" data-bs-target="#n2mAccountMenu" aria-controls="n2mAccountMenu" aria-label="Open menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -66,7 +66,7 @@
         </div>
       </div>
       <!-- Row 2: Main nav links (Home, Articles, ...) — BBC-style horizontal bar -->
-      <div class="n2m-nav-row2 border-top border-bottom">
+      <div class="n2m-nav-row2">
         <div class="container n2m-nav-row2-inner">
           <button class="navbar-toggler n2m-nav-row2-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -93,20 +93,12 @@
               <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}" href="{% url 'content:review_list' %}">Reviews</a></li>
               <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'content:about' %}">About</a></li>
               <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'content:contact' %}">Contact</a></li>
-              <li class="nav-item n2m-nav-theme-wrap ms-lg-auto d-flex align-items-center gap-2">
-                <form class="n2m-nav-search-inline d-flex align-items-center" action="{% url 'content:post_list' %}" method="get" role="search">
-                  <label class="visually-hidden" for="navSearchInput">Search</label>
-                  <input class="n2m-nav-search-inline-input" id="navSearchInput" type="search" name="q" placeholder="Search…" value="{{ request.GET.q }}" aria-label="Search articles">
-                  <button class="n2m-nav-search-inline-btn" type="submit" aria-label="Submit search">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                  </button>
-                </form>
-              </li>
             </ul>
           </div>
         </div>
       </div>
     </div>
+    <div class="n2m-nav-row2-spacer" id="n2mNavRow2Spacer" aria-hidden="true"></div>
   </nav>
 
   <div class="offcanvas offcanvas-start n2m-offcanvas-menu" tabindex="-1" id="n2mAccountMenu" aria-labelledby="n2mAccountMenuLabel">
@@ -115,6 +107,15 @@
       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body n2m-offcanvas-body">
+      <form class="n2m-sidebar-search mb-4" action="{% url 'content:post_list' %}" method="get" role="search">
+        <label class="visually-hidden" for="sidebarSearchInput">Search articles</label>
+        <div class="input-group">
+          <input class="form-control n2m-sidebar-search-input" id="sidebarSearchInput" type="search" name="q" placeholder="Search articles…" value="{{ request.GET.q }}" aria-label="Search articles">
+          <button class="btn btn-n2m n2m-sidebar-search-btn" type="submit" aria-label="Search">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          </button>
+        </div>
+      </form>
       {% include "partials/sidebar_menu_content.html" %}
     </div>
   </div>

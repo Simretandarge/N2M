@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Review drafts{% endblock %}
+{% block meta_description %}Approve and publish or reject writers' drafts.{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <h1 class="h2 text-white mb-0">Review drafts</h1>
+    <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-n2m">← Dashboard</a>
+  </div>
+  <p class="text-muted mb-4">Publish drafts to make them live on the site, or leave them as draft. Editors cannot publish their own content — only another editor or admin can approve it.</p>
+
+  <section class="card card-n2m p-4 mb-4">
+    <h2 class="h5 text-white mb-3">Draft posts</h2>
+    {% if draft_posts %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for post in draft_posts %}
+          <tr>
+            <td><strong>{{ post.title|truncatewords:8 }}</strong></td>
+            <td>{{ post.author.get_username|default:"—" }}</td>
+            <td>{% if post.category %}{{ post.category.name }}{% else %}—{% endif %}</td>
+            <td>{{ post.updated_at|date:"M j, Y" }}</td>
+            <td>
+              <a href="{% url 'content:manage_post_edit' post.pk %}" class="btn btn-sm btn-outline-n2m me-1">Edit</a>
+              {% if request.user.is_superuser or post.author_id != request.user.pk %}
+              <a href="{% url 'accounts:review_drafts_publish_post' post.pk %}" class="btn btn-sm btn-n2m me-1">Publish</a>
+              <a href="{% url 'accounts:review_drafts_reject_post' post.pk %}" class="btn btn-sm btn-outline-secondary">Reject</a>
+              {% else %}
+              <span class="text-muted small" title="Another editor or admin must approve your content">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted mb-0">No draft posts.</p>
+    {% endif %}
+  </section>
+
+  <section class="card card-n2m p-4">
+    <h2 class="h5 text-white mb-3">Draft reviews</h2>
+    {% if draft_reviews %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Product</th>
+            <th>Author</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for review in draft_reviews %}
+          <tr>
+            <td><strong>{{ review.title|truncatewords:8 }}</strong></td>
+            <td>{{ review.product_name|truncatewords:4 }}</td>
+            <td>{{ review.author.get_username|default:"—" }}</td>
+            <td>{{ review.updated_at|date:"M j, Y" }}</td>
+            <td>
+              <a href="{% url 'content:manage_review_edit' review.pk %}" class="btn btn-sm btn-outline-n2m me-1">Edit</a>
+              {% if request.user.is_superuser or review.author_id != request.user.pk %}
+              <a href="{% url 'accounts:review_drafts_publish_review' review.pk %}" class="btn btn-sm btn-n2m me-1">Publish</a>
+              <a href="{% url 'accounts:review_drafts_reject_review' review.pk %}" class="btn btn-sm btn-outline-secondary">Reject</a>
+              {% else %}
+              <span class="text-muted small" title="Another editor or admin must approve your content">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted mb-0">No draft reviews.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

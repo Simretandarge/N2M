@@ -5,18 +5,26 @@
     {% if user_role == 'admin' %}
       <ul class="list-unstyled small mb-0">
         <li class="mb-2"><a href="{% url 'accounts:dashboard_admin' %}">Admin dashboard</a></li>
-        <li class="mb-2"><a href="/admin/" target="_blank" rel="noopener">Django Admin</a></li>
-        <li class="mb-2"><a href="/admin/content/post/add/" target="_blank" rel="noopener">Add post</a></li>
-        <li class="mb-2"><a href="/admin/content/review/add/" target="_blank" rel="noopener">Add review</a></li>
-        <li class="mb-2"><a href="/admin/auth/user/" target="_blank" rel="noopener">Users</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}?mine=1">My posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_review_list' %}?mine=1">My reviews</a></li>
+        <li class="mb-2"><a href="{% url 'accounts:review_drafts' %}">Review drafts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}">All posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_review_list' %}">All reviews</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_category_list' %}">Categories</a></li>
+        <li class="mb-2"><a href="{% url 'accounts:user_list' %}">Manage users</a></li>
+        <li class="mb-2"><a href="{% url 'accounts:editor_applications_list' %}">Editor applications</a></li>
+        <li class="mb-2"><a href="/admin/" target="_blank" rel="noopener">Open Django Admin</a></li>
         <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
       </ul>
     {% elif user_role == 'editor' %}
       <ul class="list-unstyled small mb-0">
         <li class="mb-2"><a href="{% url 'accounts:dashboard_editor' %}">Editor dashboard</a></li>
-        <li class="mb-2"><a href="/admin/content/post/" target="_blank" rel="noopener">All posts</a></li>
-        <li class="mb-2"><a href="/admin/content/review/" target="_blank" rel="noopener">All reviews</a></li>
-        <li class="mb-2"><a href="/admin/content/category/" target="_blank" rel="noopener">Categories</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}?mine=1">My posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_review_list' %}?mine=1">My reviews</a></li>
+        <li class="mb-2"><a href="{% url 'accounts:review_drafts' %}">Review drafts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}">All posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_review_list' %}">All reviews</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_category_list' %}">Categories</a></li>
         <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
       </ul>
     {% elif user_role == 'writer' %}
