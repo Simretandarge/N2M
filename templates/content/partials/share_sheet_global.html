@@ -1,0 +1,134 @@
+{% comment %}Single page-level share sheet; include once in base.html (end of body).{% endcomment %}
+<style>
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-menu{
+    position:fixed !important;left:50% !important;bottom:12px !important;transform:translateX(-50%) !important;
+    width:min(94vw,720px) !important;z-index:1002 !important;border-radius:18px !important;
+    border:1px solid rgba(148,163,184,.35) !important;box-shadow:0 18px 45px rgba(2,6,23,.6) !important;
+    background:#f3f4f6 !important;color:#0f172a !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-sheet-wrap{
+    position: relative;
+    padding-left: 2.1rem;
+    padding-right: 2.1rem;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-sheet-row{
+    display:flex !important;flex-wrap:nowrap !important;gap:.72rem !important;overflow-x:auto !important;overflow-y:hidden !important;
+    -webkit-overflow-scrolling:touch !important;scroll-behavior:smooth !important;scrollbar-width:none;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-sheet-row::-webkit-scrollbar{display:none;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-prev,
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-next{
+    position:absolute !important;top:50% !important;transform:translateY(-50%) !important;
+    width:2.05rem !important;height:2.05rem !important;border-radius:999px !important;border:0 !important;
+    background:rgba(15,23,42,.78) !important;color:#fff !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;
+    z-index:2 !important;cursor:pointer !important;
+    transition:opacity .2s ease !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-prev:disabled,
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-next:disabled{
+    opacity:.35 !important;
+    cursor:not-allowed !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-prev{left:0 !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-next{right:0 !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-prev[hidden],
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-next[hidden]{display:none !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-prev:hover:not(:disabled),
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-next:hover:not(:disabled){opacity:.92 !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-prev-icon,
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-next-icon{
+    width: 0.65rem !important;
+    height: 0.65rem !important;
+    border-top: 2px solid currentColor !important;
+    border-right: 2px solid currentColor !important;
+    display: inline-block !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-prev-icon{transform: rotate(-135deg);}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-scroll-next-icon{transform: rotate(45deg);}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item{
+    display:inline-flex !important;flex-direction:column !important;align-items:center !important;justify-content:flex-start !important;
+    min-width:80px !important;gap:.45rem !important;padding:.2rem .15rem !important;text-decoration:none !important;color:#111827 !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-icon{
+    width:46px !important;height:46px !important;border-radius:999px !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;
+    font-size:.95rem !important;font-weight:700 !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-label{font-size:.82rem !important;line-height:1.1 !important;white-space:nowrap !important;text-align:center !important;color:#111827 !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-copy .n2m-share-item-icon{background:#e2e8f0 !important;color:#0f172a !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-instagram .n2m-share-item-icon{background:linear-gradient(135deg,#f58529,#dd2a7b 55%,#8134af) !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-linkedin .n2m-share-item-icon{background:#0a66c2 !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-facebook .n2m-share-item-icon{background:#1877f2 !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-messenger .n2m-share-item-icon{background:linear-gradient(135deg,#00b2ff,#006aff) !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-whatsapp .n2m-share-item-icon{background:#25d366 !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-email .n2m-share-item-icon{background:#64748b !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-threads .n2m-share-item-icon{background:#111827 !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-tiktok .n2m-share-item-icon{background:#000 !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-twitter .n2m-share-item-icon{background:#000 !important;color:#fff !important;}
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-backdrop{
+    position:fixed !important;inset:0 !important;z-index:1001 !important;border:0 !important;background:rgba(2,6,23,.5) !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-step-prepare .n2m-share-prepare-hint{
+    font-size:.88rem !important;line-height:1.35 !important;color:#334155 !important;margin-bottom:.65rem !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-prepare-text{
+    font-size:.9rem !important;line-height:1.45 !important;width:100% !important;resize:vertical !important;
+    min-height:7.5rem !important;border:1px solid #cbd5e1 !important;border-radius:10px !important;padding:.6rem .75rem !important;
+    background:#fff !important;color:#0f172a !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-prepare-actions{
+    display:flex !important;flex-wrap:wrap !important;gap:.5rem !important;margin-top:.75rem !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-prepare-back{
+    border:0 !important;background:transparent !important;color:#475569 !important;font-size:.88rem !important;
+    padding:.25rem 0 !important;margin-bottom:.35rem !important;text-decoration:underline !important;cursor:pointer !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-prepare-copy{
+    border:1px solid #94a3b8 !important;background:#fff !important;color:#0f172a !important;border-radius:10px !important;
+    padding:.45rem .85rem !important;font-size:.85rem !important;cursor:pointer !important;
+  }
+  #n2m-share-global.n2m-share-menu-wrap .n2m-share-prepare-open{
+    border:0 !important;background:#1F2A44 !important;color:#fff !important;border-radius:10px !important;
+    padding:.45rem .85rem !important;font-size:.85rem !important;cursor:pointer !important;flex:1 1 auto !important;
+  }
+  @media (max-width:575.98px){
+    #n2m-share-global.n2m-share-menu-wrap .n2m-share-menu{bottom:8px !important;border-radius:16px !important;padding:.8rem !important;}
+    #n2m-share-global.n2m-share-menu-wrap .n2m-share-item{min-width:74px !important;}
+    #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-icon{width:42px !important;height:42px !important;}
+    #n2m-share-global.n2m-share-menu-wrap .n2m-share-item-label{font-size:.78rem !important;}
+  }
+</style>
+<div id="n2m-share-global" class="n2m-share-menu-wrap position-relative" aria-hidden="true">
+  {# Holds active URL/title for share actions (not a visible control). #}
+  <button type="button" class="n2m-share-data-source visually-hidden" tabindex="-1" data-url="" data-title="" data-summary="" data-image="" data-instagram-post-url="" aria-hidden="true"></button>
+  <button type="button" class="n2m-share-backdrop" hidden aria-label="Close share options"></button>
+  <div class="n2m-share-menu card card-n2m p-3" hidden>
+    <div class="n2m-share-step n2m-share-step-main">
+      <div class="n2m-share-sheet-wrap">
+        <div class="n2m-share-sheet-row">
+          <a href="#" class="n2m-share-item n2m-share-item-copy" data-share-network="copy" role="button"><span class="n2m-share-item-icon">🔗</span><span class="n2m-share-item-label">Copy link</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-instagram" data-share-network="instagram" role="button"><span class="n2m-share-item-icon">IG</span><span class="n2m-share-item-label">Instagram</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-linkedin" data-share-network="linkedin" role="button"><span class="n2m-share-item-icon">in</span><span class="n2m-share-item-label">LinkedIn</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-facebook" data-share-network="facebook" role="button"><span class="n2m-share-item-icon">f</span><span class="n2m-share-item-label">Facebook</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-messenger" data-share-network="messenger" role="button"><span class="n2m-share-item-icon">✉</span><span class="n2m-share-item-label">Messenger</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-whatsapp" data-share-network="whatsapp" role="button"><span class="n2m-share-item-icon">WA</span><span class="n2m-share-item-label">WhatsApp</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-email" data-share-network="email" role="button"><span class="n2m-share-item-icon">✉</span><span class="n2m-share-item-label">Email</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-threads" data-share-network="threads" role="button"><span class="n2m-share-item-icon">@</span><span class="n2m-share-item-label">Threads</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-tiktok" data-share-network="tiktok" role="button"><span class="n2m-share-item-icon">TT</span><span class="n2m-share-item-label">TikTok</span></a>
+          <a href="#" class="n2m-share-item n2m-share-item-twitter" data-share-network="twitter" role="button"><span class="n2m-share-item-icon">X</span><span class="n2m-share-item-label">X</span></a>
+        </div>
+        <button type="button" class="n2m-share-scroll-prev" aria-label="Previous share options" hidden><span class="n2m-share-scroll-prev-icon" aria-hidden="true"></span></button>
+        <button type="button" class="n2m-share-scroll-next" aria-label="More share options"><span class="n2m-share-scroll-next-icon" aria-hidden="true"></span></button>
+      </div>
+    </div>
+    <div class="n2m-share-step n2m-share-step-prepare" hidden>
+      <button type="button" class="n2m-share-prepare-back">← Back to apps</button>
+      <p class="n2m-share-prepare-hint">Caption copied. On <strong>phone</strong>, you may get a system share sheet with your text. Otherwise open <strong class="n2m-share-prepare-network-name">the app</strong> and paste (Facebook / LinkedIn / X also pre-fill from the link where supported).</p>
+      <label class="visually-hidden" for="n2m-share-prepare-text">Share text</label>
+      <textarea id="n2m-share-prepare-text" class="n2m-share-prepare-text" rows="7"></textarea>
+      <div class="n2m-share-prepare-actions">
+        <button type="button" class="n2m-share-prepare-copy">Copy again</button>
+        <button type="button" class="n2m-share-prepare-open">Open app</button>
+      </div>
+    </div>
+  </div>
+</div>
