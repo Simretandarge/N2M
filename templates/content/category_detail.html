@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load display_counts %}
 
 {% block title %}{{ category.name }}{% endblock %}
 {% block meta_description %}Articles about {{ category.name }}. Technology, AI, Startups &amp; innovation.{% endblock %}
@@ -16,17 +17,44 @@
     <article class="card card-n2m overflow-hidden">
       <div class="row g-0">
         <div class="col-md-5">
-          {% if featured.featured_image %}
-          <img src="{{ featured.featured_image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ featured.title }}" style="min-height: 240px; object-fit: cover;">
+          {% if featured.featured_image or featured.gallery_image_count %}
+          <div id="postMediaCategoryFeatured{{ featured.pk }}" class="carousel slide n2m-card-carousel h-100" data-bs-touch="true" data-bs-interval="false">
+            <div class="carousel-inner h-100">
+              {% if featured.featured_image %}
+              <div class="carousel-item active h-100">
+                <img src="{{ featured.featured_image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ featured.title }}">
+              </div>
+              {% endif %}
+              {% for m in featured.media_items.all %}
+                {% if m.image %}
+                <div class="carousel-item h-100 {% if not featured.featured_image and forloop.first %}active{% endif %}">
+                  <img src="{{ m.image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ featured.title }}">
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if featured.gallery_image_count > 1 or featured.featured_image and featured.gallery_image_count > 0 %}
+            <button class="carousel-control-prev n2m-card-carousel-control" type="button" data-bs-target="#postMediaCategoryFeatured{{ featured.pk }}" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next n2m-card-carousel-control" type="button" data-bs-target="#postMediaCategoryFeatured{{ featured.pk }}" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+            <div class="carousel-indicators n2m-card-carousel-indicators">
+              {% if featured.featured_image %}<button type="button" data-bs-target="#postMediaCategoryFeatured{{ featured.pk }}" data-bs-slide-to="0" class="active" aria-current="true"></button>{% endif %}
+              {% for m in featured.media_items.all %}{% if m.image %}<button type="button" data-bs-target="#postMediaCategoryFeatured{{ featured.pk }}" data-bs-slide-to="{% if featured.featured_image %}{{ forloop.counter }}{% else %}{{ forloop.counter0 }}{% endif %}" {% if not featured.featured_image and forloop.first %}class="active" aria-current="true"{% endif %}></button>{% endif %}{% endfor %}
+            </div>
+            {% endif %}
+          </div>
           {% else %}
-          <div class="bg-dark d-flex align-items-center justify-content-center h-100" style="min-height: 240px;"><span class="text-muted">No image</span></div>
+          <div class="bg-dark d-flex align-items-center justify-content-center h-100"><span class="text-muted">No image</span></div>
           {% endif %}
         </div>
         <div class="col-md-7">
           <div class="card-body p-4">
             <h3 class="card-title h3"><a href="{{ featured.get_absolute_url }}" class="text-white text-decoration-none">{{ featured.title }}</a></h3>
             <p class="card-text">{{ featured.excerpt|truncatewords:30 }}</p>
-            <p class="text-muted small mb-0">{{ featured.published_at|date:"F j, Y" }} · {{ featured.views }} views</p>
+            <p class="text-muted small mb-0">{{ featured.published_at|date:"F j, Y" }} &middot; {{ featured|public_view_count }} views</p>
             <a href="{{ featured.get_absolute_url }}" class="btn btn-n2m mt-3">Read more</a>
           </div>
         </div>
@@ -41,15 +69,42 @@
       {% for post in latest %}
       <div class="col-md-6 col-lg-4">
         <article class="card card-n2m h-100">
-          {% if post.featured_image %}
-          <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 180px; object-fit: cover;">
+          {% if post.featured_image or post.gallery_image_count %}
+          <div id="postMediaCategory{{ post.pk }}" class="carousel slide n2m-card-carousel" data-bs-touch="true" data-bs-interval="false">
+            <div class="carousel-inner">
+              {% if post.featured_image %}
+              <div class="carousel-item active">
+                <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}">
+              </div>
+              {% endif %}
+              {% for m in post.media_items.all %}
+                {% if m.image %}
+                <div class="carousel-item {% if not post.featured_image and forloop.first %}active{% endif %}">
+                  <img src="{{ m.image.url }}" class="card-img-top" alt="{{ post.title }}">
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% if post.gallery_image_count > 1 or post.featured_image and post.gallery_image_count > 0 %}
+            <button class="carousel-control-prev n2m-card-carousel-control" type="button" data-bs-target="#postMediaCategory{{ post.pk }}" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next n2m-card-carousel-control" type="button" data-bs-target="#postMediaCategory{{ post.pk }}" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+            <div class="carousel-indicators n2m-card-carousel-indicators">
+              {% if post.featured_image %}<button type="button" data-bs-target="#postMediaCategory{{ post.pk }}" data-bs-slide-to="0" class="active" aria-current="true"></button>{% endif %}
+              {% for m in post.media_items.all %}{% if m.image %}<button type="button" data-bs-target="#postMediaCategory{{ post.pk }}" data-bs-slide-to="{% if post.featured_image %}{{ forloop.counter }}{% else %}{{ forloop.counter0 }}{% endif %}" {% if not post.featured_image and forloop.first %}class="active" aria-current="true"{% endif %}></button>{% endif %}{% endfor %}
+            </div>
+            {% endif %}
+          </div>
           {% else %}
-          <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 180px;"><span class="text-muted small">No image</span></div>
+          <div class="card-img-top bg-dark d-flex align-items-center justify-content-center"><span class="text-muted small">No image</span></div>
           {% endif %}
           <div class="card-body">
             <h3 class="card-title h6"><a href="{{ post.get_absolute_url }}" class="text-white text-decoration-none">{{ post.title|truncatewords:8 }}</a></h3>
             <p class="card-text small">{{ post.excerpt|truncatewords:15|default:post.content|truncatewords:15 }}</p>
-            <p class="text-muted small mb-0">{{ post.published_at|date:"M j, Y" }} · {{ post.views }} views</p>
+            <p class="text-muted small mb-0">{{ post.published_at|date:"M j, Y" }} &middot; {{ post|public_view_count }} views</p>
           </div>
         </article>
       </div>

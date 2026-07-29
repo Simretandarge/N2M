@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Preferences{% endblock %}
+{% block meta_description %}Your topics and newsletter preferences.{% endblock %}
+{% block content_col_class %}col-12{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <nav class="mb-4">
+        <a href="{% url 'reader:account_settings' %}" class="text-muted small text-decoration-none">← Settings</a>
+      </nav>
+      <h1 class="h2 text-white mb-2">Preferences</h1>
+      <p class="text-muted mb-4">Choose topics you follow and how you get weekly insights.</p>
+
+      <div class="card card-n2m p-4">
+        <form method="post" action="{% url 'reader:account_preferences' %}">
+          {% csrf_token %}
+          <h2 class="h6 text-white mb-3">Follow topics</h2>
+          <p class="text-muted small mb-3">We’ll use this to personalize your experience and newsletter (when available).</p>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" name="follow_ai" id="id_follow_ai" {% if prefs.follow_ai %}checked{% endif %}>
+            <label class="form-check-label text-white" for="id_follow_ai">AI</label>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" name="follow_startups" id="id_follow_startups" {% if prefs.follow_startups %}checked{% endif %}>
+            <label class="form-check-label text-white" for="id_follow_startups">Startups</label>
+          </div>
+          <div class="form-check form-switch mb-4">
+            <input class="form-check-input" type="checkbox" name="follow_reviews" id="id_follow_reviews" {% if prefs.follow_reviews %}checked{% endif %}>
+            <label class="form-check-label text-white" for="id_follow_reviews">Reviews</label>
+          </div>
+
+          <h2 class="h6 text-white mb-3">Newsletter</h2>
+          <p class="text-muted small mb-3">Get weekly insights — tech, AI, startups — in your inbox.</p>
+          <div class="form-check form-switch mb-4">
+            <input class="form-check-input" type="checkbox" name="newsletter_weekly" id="id_newsletter_weekly" {% if prefs.newsletter_weekly %}checked{% endif %}>
+            <label class="form-check-label text-white" for="id_newsletter_weekly">Receive weekly insights</label>
+          </div>
+
+          <button type="submit" class="btn btn-n2m">Save preferences</button>
+        </form>
+      </div>
+
+      <p class="text-muted small mt-3">Your email for the newsletter is the one on your <a href="{% url 'accounts:profile' %}">profile</a>. Make sure it’s up to date.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+<div class="mb-4">
+  <label for="{{ extra_images_field.id_for_label }}" class="form-label text-white">Images (up to 6)</label>
+  {{ extra_images_field }}
+  {% if extra_images_field.help_text %}<div class="form-text text-muted">{{ extra_images_field.help_text }}</div>{% endif %}
+  {% if extra_images_field.errors %}<div class="form-text text-danger">{{ extra_images_field.errors }}</div>{% endif %}
+</div>
+<div class="mb-4">
+  <label for="{{ extra_videos_field.id_for_label }}" class="form-label text-white">Videos (up to 6)</label>
+  {{ extra_videos_field }}
+  {% if extra_videos_field.help_text %}<div class="form-text text-muted">{{ extra_videos_field.help_text }}</div>{% endif %}
+  {% if extra_videos_field.errors %}<div class="form-text text-danger">{{ extra_videos_field.errors }}</div>{% endif %}
+</div>
+<div class="d-none">
+  {{ cover_image_field }}
+  {{ cover_video_field }}
+</div>

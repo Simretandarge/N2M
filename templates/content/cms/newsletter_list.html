@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Newsletter{% endblock %}
+{% block meta_description %}Create and send newsletter issues to subscribers.{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <h1 class="h2 text-white mb-0">Newsletter</h1>
+    <div class="d-flex gap-2">
+      <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-n2m">← Dashboard</a>
+      <a href="{% url 'content:manage_newsletter_create' %}" class="btn btn-n2m">New newsletter</a>
+    </div>
+  </div>
+
+  <div class="card card-n2m p-4 mb-4">
+    <h2 class="h5 text-white mb-2">Send weekly digest (recommended)</h2>
+    <p class="text-muted small mb-2">One email per run with the top newsletter topics from the last 7 days (up to {{ weekly_digest_max_items }} items).</p>
+    <p class="text-muted small mb-3">Allowed send window: <strong>{{ weekly_digest_schedule_text }}</strong>.</p>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{% url 'content:send_weekly_digest' %}" class="btn btn-n2m" onclick="return confirm('Send one weekly digest (last 7 days) to subscribers now?');">Send weekly digest</a>
+    </div>
+  </div>
+
+  <h2 class="h5 text-white mb-2">Custom newsletter issues</h2>
+  <p class="text-muted small mb-4">Create one-off issues with status flow: <strong>Draft</strong> (not public), <strong>Posted</strong> (public on site, not emailed), <strong>Sent</strong> (emailed and public). <strong>Send top N</strong> sends a single roundup email with links to each topic—not one email per topic.</p>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card card-n2m p-3 h-100">
+        <h3 class="h6 text-white mb-3">Draft</h3>
+        {% for issue in draft_issues %}
+          <div class="border-bottom border-secondary pb-2 mb-2">
+            <div class="text-white fw-semibold">{{ issue.title|truncatewords:8 }}</div>
+            <div class="small text-muted mb-2">{{ issue.created_at|date:"M j, Y H:i" }}</div>
+            <a href="{% url 'content:manage_newsletter_edit' issue.pk %}" class="btn btn-sm btn-outline-n2m me-1">Edit</a>
+            <a href="{% url 'content:manage_newsletter_post' issue.pk %}" class="btn btn-sm btn-outline-info me-1" onclick="return confirm('Post this newsletter on the site without sending email?');">Post</a>
+            <a href="{% url 'content:manage_newsletter_send' issue.pk %}" class="btn btn-sm btn-n2m" onclick="return confirm('Send this newsletter to all subscribers now?');">Send</a>
+            <form method="post" action="{% url 'content:manage_newsletter_delete' issue.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('Delete this newsletter? This cannot be undone.');">Delete</button>
+            </form>
+          </div>
+        {% empty %}
+          <p class="text-muted small mb-0">No drafts.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card card-n2m p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3 gap-2">
+          <h3 class="h6 text-white mb-0">Posted</h3>
+          <a href="{% url 'content:manage_newsletter_send_posted' %}" class="btn btn-sm btn-n2m" onclick="return confirm('Send ONE email to all subscribers with up to {{ weekly_digest_max_items }} topic links (viral-ranked)?');">Send top {{ weekly_digest_max_items }}</a>
+        </div>
+        {% for issue in posted_issues %}
+          <div class="border-bottom border-secondary pb-2 mb-2">
+            <div class="text-white fw-semibold">{{ issue.title|truncatewords:8 }}</div>
+            <div class="small text-muted mb-2">Posted {{ issue.posted_at|date:"M j, Y" }}</div>
+            <a href="{% url 'content:manage_newsletter_edit' issue.pk %}" class="btn btn-sm btn-outline-n2m me-1">Edit</a>
+            <a href="{% url 'content:manage_newsletter_send' issue.pk %}" class="btn btn-sm btn-n2m me-1" onclick="return confirm('Send only this posted newsletter to all subscribers now?');">Send</a>
+            <form method="post" action="{% url 'content:manage_newsletter_delete' issue.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('Delete this newsletter? This cannot be undone.');">Delete</button>
+            </form>
+            <span class="small text-muted d-inline-block mt-1">Tip: <strong>Send</strong> emails the full text of one issue. <strong>Send top {{ weekly_digest_max_items }}</strong> sends one roundup email with links to each topic.</span>
+          </div>
+        {% empty %}
+          <p class="text-muted small mb-0">No current-week posted issues.</p>
+        {% endfor %}
+        {% if posted_older_count %}
+        <div class="text-center mt-3">
+          <button class="btn btn-sm btn-outline-n2m" type="button" data-bs-toggle="collapse" data-bs-target="#olderPostedIssues" aria-expanded="false" aria-controls="olderPostedIssues">
+            Show older posted ({{ posted_older_count }})
+          </button>
+        </div>
+        <div class="collapse mt-3" id="olderPostedIssues">
+          {% for issue in posted_older_issues %}
+          <div class="border-bottom border-secondary pb-2 mb-2">
+            <div class="text-white fw-semibold">{{ issue.title|truncatewords:8 }}</div>
+            <div class="small text-muted mb-2">Posted {{ issue.posted_at|date:"M j, Y" }}</div>
+            <a href="{% url 'content:manage_newsletter_edit' issue.pk %}" class="btn btn-sm btn-outline-n2m me-1">Edit</a>
+            <a href="{% url 'content:manage_newsletter_send' issue.pk %}" class="btn btn-sm btn-n2m me-1" onclick="return confirm('Send only this posted newsletter to all subscribers now?');">Send</a>
+            <form method="post" action="{% url 'content:manage_newsletter_delete' issue.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger ms-1" onclick="return confirm('Delete this newsletter? This cannot be undone.');">Delete</button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card card-n2m p-3 h-100">
+        <div class="d-flex align-items-center justify-content-between mb-3 gap-2 flex-wrap">
+          <h3 class="h6 text-white mb-0">Sent (recent)</h3>
+          <div class="d-flex flex-wrap gap-1 justify-content-end">
+            {% if sent_total_count %}
+            <form method="post" action="{% url 'content:manage_newsletter_unsend_all_sent' %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-warning text-warning" onclick="return confirm('Move all {{ sent_total_count }} sent newsletter(s) back to Posted? You can then use Send top or Send per issue.');">All → Posted</button>
+            </form>
+            {% endif %}
+            <a href="{% url 'content:manage_newsletter_sent_archive' %}" class="btn btn-sm btn-outline-n2m">View all</a>
+          </div>
+        </div>
+        {% for issue in sent_recent_issues %}
+          <div class="border-bottom border-secondary pb-2 mb-2">
+            <div class="text-white fw-semibold">{{ issue.title|truncatewords:8 }}</div>
+            <div class="small text-muted mb-2">Sent {{ issue.sent_at|date:"M j, Y" }}</div>
+            <div class="d-flex flex-wrap gap-1">
+              <form method="post" action="{% url 'content:manage_newsletter_unsend_to_posted' issue.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-secondary" onclick="return confirm('Move this issue back to Posted? It will no longer count as emailed.');">Back to Posted</button>
+              </form>
+              <form method="post" action="{% url 'content:manage_newsletter_resend' issue.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-n2m" onclick="return confirm('Send this newsletter to all subscribers again?');">Resend</button>
+              </form>
+              <form method="post" action="{% url 'content:manage_newsletter_delete' issue.pk %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this sent newsletter record? This cannot be undone.');">Delete</button>
+              </form>
+            </div>
+          </div>
+        {% empty %}
+          <p class="text-muted small mb-0">No sent issues.</p>
+        {% endfor %}
+        {% if sent_total_count > 5 %}
+        <p class="small text-muted mb-0 mt-2">Showing latest 5 of {{ sent_total_count }} sent newsletters.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

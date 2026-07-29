@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load display_counts %}
 
 {% block title %}Articles{% endblock %}
 {% block meta_description %}Browse all articles on technology, AI, startups, and innovation.{% endblock %}
@@ -34,8 +35,35 @@
     {% for post in page_obj %}
     <div class="col-md-6 col-lg-4">
       <article class="card card-n2m h-100">
-        {% if post.featured_image %}
-        <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}">
+        {% if post.featured_image or post.gallery_image_count %}
+        <div id="postMediaList{{ post.pk }}" class="carousel slide n2m-card-carousel" data-bs-touch="true" data-bs-interval="false">
+          <div class="carousel-inner">
+            {% if post.featured_image %}
+            <div class="carousel-item active">
+              <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}">
+            </div>
+            {% endif %}
+            {% for m in post.media_items.all %}
+              {% if m.image %}
+              <div class="carousel-item {% if not post.featured_image and forloop.first %}active{% endif %}">
+                <img src="{{ m.image.url }}" class="card-img-top" alt="{{ post.title }}">
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% if post.gallery_image_count > 1 or post.featured_image and post.gallery_image_count > 0 %}
+          <button class="carousel-control-prev n2m-card-carousel-control" type="button" data-bs-target="#postMediaList{{ post.pk }}" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button class="carousel-control-next n2m-card-carousel-control" type="button" data-bs-target="#postMediaList{{ post.pk }}" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+          <div class="carousel-indicators n2m-card-carousel-indicators">
+            {% if post.featured_image %}<button type="button" data-bs-target="#postMediaList{{ post.pk }}" data-bs-slide-to="0" class="active" aria-current="true"></button>{% endif %}
+            {% for m in post.media_items.all %}{% if m.image %}<button type="button" data-bs-target="#postMediaList{{ post.pk }}" data-bs-slide-to="{% if post.featured_image %}{{ forloop.counter }}{% else %}{{ forloop.counter0 }}{% endif %}" {% if not post.featured_image and forloop.first %}class="active" aria-current="true"{% endif %}></button>{% endif %}{% endfor %}
+          </div>
+          {% endif %}
+        </div>
         {% else %}
         <div class="card-img-top bg-dark d-flex align-items-center justify-content-center"><span class="text-muted small">No image</span></div>
         {% endif %}
@@ -43,8 +71,8 @@
           {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none mb-2">{{ post.category.name }}</a>{% endif %}
           <h2 class="card-title h6"><a href="{{ post.get_absolute_url }}" class="text-white text-decoration-none">{{ post.title }}</a></h2>
           <p class="card-text small">{{ post.excerpt|truncatewords:20|default:post.content|truncatewords:20 }}</p>
-          <p class="text-muted small mb-0">{{ post.published_at|date:"F j, Y" }} &middot; {{ post.views }} views</p>
-          {% include "content/partials/post_card_actions.html" with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids next_url=request.build_absolute_uri %}
+          <p class="text-muted small mb-0">{{ post.published_at|date:"F j, Y" }} &middot; {{ post|public_view_count }} views</p>
+          {% include "content/partials/post_card_actions.html" with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids next_url=request.path %}
         </div>
       </article>
     </div>

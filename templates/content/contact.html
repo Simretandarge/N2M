@@ -4,45 +4,62 @@
 {% block meta_description %}Contact Next 251 Media. Send a message or find our email and social links.{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <header class="mb-4">
-    <h1 class="display-5 text-white mb-2">Contact</h1>
-    <p class="text-muted">Get in touch for editorial, partnerships, or general inquiries.</p>
+<div class="container n2m-contact-page py-4 py-md-5">
+  <header class="n2m-contact-header mb-4 mb-md-5">
+    <span class="n2m-section-title mb-2">Contact</span>
+    <h1 class="display-5 text-white mb-2">Let's work together</h1>
+    <p class="text-muted mb-0">Reach out for editorial opportunities, partnerships, product features, or general questions.</p>
   </header>
 
-  <div class="row">
-    <div class="col-lg-6 mb-4 mb-lg-0">
-      <form method="post" action="{% url 'content:contact' %}" class="card card-n2m p-4">
-        {% csrf_token %}
-        <div class="mb-3">
-          <label for="id_name" class="form-label text-white">Name</label>
-          {{ form.name }}
-          {% if form.name.errors %}<div class="form-text text-danger">{{ form.name.errors }}</div>{% endif %}
-        </div>
-        <div class="mb-3">
-          <label for="id_email" class="form-label text-white">Email</label>
-          {{ form.email }}
-          {% if form.email.errors %}<div class="form-text text-danger">{{ form.email.errors }}</div>{% endif %}
-        </div>
-        <div class="mb-3">
-          <label for="id_subject" class="form-label text-white">Subject</label>
-          {{ form.subject }}
-          {% if form.subject.errors %}<div class="form-text text-danger">{{ form.subject.errors }}</div>{% endif %}
-        </div>
-        <div class="mb-3">
-          <label for="id_message" class="form-label text-white">Message</label>
-          {{ form.message }}
-          {% if form.message.errors %}<div class="form-text text-danger">{{ form.message.errors }}</div>{% endif %}
-        </div>
-        <button type="submit" class="btn btn-n2m">Send message</button>
-      </form>
+  <div class="row g-4">
+    <div class="col-12 col-lg-7">
+      <section class="card card-n2m p-4 p-md-5 n2m-contact-form-card h-100">
+        <h2 class="h5 text-white mb-3">Send a message</h2>
+        <form method="post" action="{% url 'content:contact' %}">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <label for="id_name" class="form-label text-white">Name</label>
+              {{ form.name }}
+              {% if form.name.errors %}<div class="form-text text-danger">{{ form.name.errors }}</div>{% endif %}
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="id_email" class="form-label text-white">Email</label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="form-text text-danger">{{ form.email.errors }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label for="id_subject" class="form-label text-white">Subject</label>
+              {{ form.subject }}
+              {% if form.subject.errors %}<div class="form-text text-danger">{{ form.subject.errors }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label for="id_message" class="form-label text-white">Message</label>
+              {{ form.message }}
+              {% if form.message.errors %}<div class="form-text text-danger">{{ form.message.errors }}</div>{% endif %}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-n2m mt-3 n2m-contact-submit">Send message</button>
+        </form>
+      </section>
     </div>
-    <div class="col-lg-6">
-      <div class="card card-n2m p-4">
-        <h2 class="h5 text-white mb-3">Other ways to reach us</h2>
-        <p class="text-muted small mb-2">Email: <a href="mailto:hello@next251media.com">hello@next251media.com</a> (replace with your actual email)</p>
-        <p class="text-muted small mb-0">Social links can be added here (Twitter/X, LinkedIn, etc.).</p>
-      </div>
+
+    <div class="col-12 col-lg-5">
+      <section class="card card-n2m p-4 mb-4 n2m-contact-info-card">
+        <h2 class="h5 text-white mb-3">Reach us directly</h2>
+        <a href="mailto:info@next251.com" class="n2m-contact-email">info@next251.com</a>
+        <p class="text-muted small mb-0 mt-2">Typical response time: within 12-24 hours.</p>
+      </section>
+
+      <section class="card card-n2m p-4 n2m-contact-social-card">
+        <h2 class="h5 text-white mb-3">Follow us</h2>
+        <div class="n2m-social-inline n2m-social-inline-contact" aria-label="Social links">
+          <a href="https://www.linkedin.com/company/next251-media-n2m/about/?viewAsMember=true" target="_blank" rel="noopener" class="n2m-social-link" aria-label="LinkedIn" title="LinkedIn"><span class="n2m-social-icon n2m-social-linkedin" aria-hidden="true">in</span></a>
+          <a href="https://www.instagram.com/next251media/" target="_blank" rel="noopener" class="n2m-social-link" aria-label="Instagram" title="Instagram"><span class="n2m-social-icon n2m-social-instagram" aria-hidden="true">◎</span></a>
+          <a href="https://www.facebook.com/share/1AhUPMiwDS/" target="_blank" rel="noopener" class="n2m-social-link" aria-label="Facebook" title="Facebook"><span class="n2m-social-icon n2m-social-facebook" aria-hidden="true">f</span></a>
+          <a href="https://www.youtube.com/@Next251-M" target="_blank" rel="noopener" class="n2m-social-link" aria-label="YouTube" title="YouTube"><span class="n2m-social-icon n2m-social-youtube" aria-hidden="true">▶</span></a>
+        </div>
+      </section>
     </div>
   </div>
 </div>

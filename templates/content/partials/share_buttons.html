@@ -1,8 +1,23 @@
-{% load static %}
-{% comment %}Expects: share_url, share_title, share_text (optional){% endcomment %}
-<div class="share-bar d-flex flex-wrap align-items-center gap-2 mb-3">
-  <span class="text-muted small me-1">Share:</span>
-  <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ share_title|urlencode }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-n2m btn-sm share-btn" title="Share on X">X</a>
-  <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-n2m btn-sm share-btn" title="Share on LinkedIn">LinkedIn</a>
-  <button type="button" class="btn btn-outline-n2m btn-sm share-btn copy-link-btn" data-url="{{ share_url }}" title="Copy link">Copy link</button>
-</div>
+{% comment %}
+Share icon only (save as UTF-8, no BOM). On server: templates/content/partials/share_buttons.html
+The bottom share sheet lives in share_sheet_global.html, included once from base.html.
+Expects: share_url, share_title. Optional: share_summary, share_image, share_instagram_url (IG post/reel permalink).
+Optional template arg icon_only is ignored (compat).
+Do not paste cPanel editor lines (Editing:, Encoding:, Keyboard shortcuts) into this file.
+{% endcomment %}
+<button
+  type="button"
+  class="n2m-action-btn n2m-action-share d-inline-flex align-items-center gap-1 text-decoration-none web-share-btn"
+  data-url="{{ share_url }}"
+  data-title="{{ share_title|default:'Next 251 Media' }}"
+  {% if share_summary %}data-summary="{{ share_summary|escape }}"{% endif %}
+  {% if share_image %}data-image="{{ share_image|escape }}"{% endif %}
+  {% if share_instagram_url %}data-instagram-post-url="{{ share_instagram_url|escape }}"{% endif %}
+  aria-label="Share"
+  title="Share"
+  aria-expanded="false"
+>
+  <span class="n2m-action-icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+  </span>
+</button>

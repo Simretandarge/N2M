@@ -1,0 +1,10 @@
+{{ site_name }} — You are on the list
+
+Thanks for subscribing. You will get our weekly newsletter roundup with links to new topics on the site.
+
+Past topics: {{ archive_url }}
+Home: {{ home_url }}
+
+{% if social_links %}Follow us: {% for link in social_links %}{{ link.label }}: {{ link.url }}{% if not forloop.last %} | {% endif %}{% endfor %}
+
+{% endif %}Manage subscription / newsletter signup on the site: {{ unsubscribe_hint }}

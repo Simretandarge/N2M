@@ -10,14 +10,14 @@
     <h1 class="h2 text-white mb-0">Manage posts</h1>
     <div class="d-flex gap-2">
       <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-n2m">← Dashboard</a>
-      <a href="{% url 'content:manage_post_create' %}" class="btn btn-n2m">New post</a>
+      <a href="{% url 'content:manage_post_create' %}" class="btn btn-n2m">New article</a>
     </div>
   </div>
 
-  <p class="text-muted small mb-3">Featured posts appear as the <strong>Featured story</strong> on the homepage. Set the &quot;Featured&quot; checkbox when editing a post. Use <strong>My posts</strong> to see only what you wrote or published.</p>
+  <p class="text-muted small mb-3">Featured articles appear as the <strong>Featured story</strong> on the homepage. Set the &quot;Featured&quot; checkbox when editing an article. Use <strong>My articles</strong> to see only what you wrote or published.</p>
   <div class="mb-3">
     <a href="{% url 'content:manage_post_list' %}" class="btn btn-sm {% if not status_filter and not featured_filter and not mine_filter %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">All</a>
-    <a href="{% url 'content:manage_post_list' %}?mine=1" class="btn btn-sm {% if mine_filter == '1' %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">My posts</a>
+    <a href="{% url 'content:manage_post_list' %}?mine=1" class="btn btn-sm {% if mine_filter == '1' %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">My articles</a>
     <a href="{% url 'content:manage_post_list' %}?status=draft{% if mine_filter %}&mine=1{% endif %}" class="btn btn-sm {% if status_filter == 'draft' %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">Drafts</a>
     <a href="{% url 'content:manage_post_list' %}?status=published{% if mine_filter %}&mine=1{% endif %}" class="btn btn-sm {% if status_filter == 'published' %}btn-n2m{% else %}btn-outline-n2m{% endif %} me-1">Published</a>
     <a href="{% url 'content:manage_post_list' %}?featured=1{% if mine_filter %}&mine=1{% endif %}" class="btn btn-sm {% if featured_filter == '1' %}btn-n2m{% else %}btn-outline-n2m{% endif %}">Featured</a>

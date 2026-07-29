@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Bookmarks{% endblock %}
+{% block meta_description %}Your saved articles, reviews, and newsletters.{% endblock %}
+{% block content_col_class %}col-12{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <nav class="mb-4">
+        <a href="{% url 'reader:account_settings' %}" class="text-muted small text-decoration-none">← Settings</a>
+      </nav>
+      <h1 class="h2 text-white mb-2">Bookmarks</h1>
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="{% url 'reader:account_bookmarks' %}?type=articles" class="btn {% if selected_type == 'articles' %}btn-n2m{% else %}btn-outline-n2m{% endif %} btn-sm">Articles</a>
+        <a href="{% url 'reader:account_bookmarks' %}?type=reviews" class="btn {% if selected_type == 'reviews' %}btn-n2m{% else %}btn-outline-n2m{% endif %} btn-sm">Reviews</a>
+        <a href="{% url 'reader:account_bookmarks' %}?type=newsletters" class="btn {% if selected_type == 'newsletters' %}btn-n2m{% else %}btn-outline-n2m{% endif %} btn-sm">Newsletters</a>
+      </div>
+
+      {% if selected_type == 'articles' %}
+      <section class="card card-n2m p-4 mb-4">
+        <h2 class="h5 text-white mb-3">Saved articles</h2>
+        <p class="text-muted small mb-3">Articles you saved for later.</p>
+        {% if bookmarks %}
+        <ul class="list-unstyled mb-0">
+          {% for b in bookmarks %}
+          <li class="card card-n2m p-3 mb-3 d-flex flex-row align-items-center flex-wrap gap-2">
+            <div class="flex-grow-1 min-w-0">
+              <a href="{{ b.post.get_absolute_url }}" class="text-white fw-medium text-decoration-none">{{ b.post.title }}</a>
+              {% if b.post.category %}
+              <span class="badge badge-n2m text-decoration-none ms-2">{{ b.post.category.name }}</span>
+              {% endif %}
+              <p class="text-muted small mb-0 mt-1">{{ b.created_at|date:"M j, Y" }}</p>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="{{ b.post.get_absolute_url }}" class="btn btn-n2m btn-sm">Read</a>
+              <a href="{% url 'accounts:toggle_save_article' b.post.pk %}?next={% url 'reader:account_bookmarks' %}%3Ftype%3Darticles" class="btn btn-outline-n2m btn-sm">Remove</a>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">No saved articles. Use “Save this article” on any article to add it here.</p>
+        {% endif %}
+      </section>
+      {% elif selected_type == 'reviews' %}
+      <section class="card card-n2m p-4 mb-4">
+        <h2 class="h5 text-white mb-3">Saved reviews</h2>
+        <p class="text-muted small mb-3">Reviews you saved for later.</p>
+        {% if bookmarked_reviews %}
+        <ul class="list-unstyled mb-0">
+          {% for br in bookmarked_reviews %}
+          <li class="card card-n2m p-3 mb-3 d-flex flex-row align-items-center flex-wrap gap-2">
+            <div class="flex-grow-1 min-w-0">
+              <a href="{{ br.review.get_absolute_url }}" class="text-white fw-medium text-decoration-none">{{ br.review.title }}</a>
+              {% if br.review.rating %}<span class="badge badge-n2m text-decoration-none ms-2">{{ br.review.rating }}/5</span>{% endif %}
+              <p class="text-muted small mb-0 mt-1">{{ br.created_at|date:"M j, Y" }}</p>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="{{ br.review.get_absolute_url }}" class="btn btn-n2m btn-sm">Read</a>
+              <a href="{% url 'accounts:toggle_save_review' br.review.pk %}?next={% url 'reader:account_bookmarks' %}%3Ftype%3Dreviews" class="btn btn-outline-n2m btn-sm">Remove</a>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">No saved reviews. Use “Save this review” on any review to add it here.</p>
+        {% endif %}
+      </section>
+      {% else %}
+      <section class="card card-n2m p-4 mb-4">
+        <h2 class="h5 text-white mb-3">Saved newsletters</h2>
+        <p class="text-muted small mb-3">Newsletter issues you saved for later.</p>
+        {% if bookmarked_newsletters %}
+        <ul class="list-unstyled mb-0">
+          {% for bn in bookmarked_newsletters %}
+          <li class="card card-n2m p-3 mb-3 d-flex flex-row align-items-center flex-wrap gap-2">
+            <div class="flex-grow-1 min-w-0">
+              <a href="{{ bn.newsletter_issue.get_absolute_url }}" class="text-white fw-medium text-decoration-none">{{ bn.newsletter_issue.title }}</a>
+              <p class="text-muted small mb-0 mt-1">{{ bn.newsletter_issue.sent_at|date:"M j, Y" }}</p>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="{{ bn.newsletter_issue.get_absolute_url }}" class="btn btn-n2m btn-sm">Read</a>
+              <a href="{% url 'accounts:toggle_save_newsletter' bn.newsletter_issue.pk %}?next={% url 'reader:account_bookmarks' %}%3Ftype%3Dnewsletters" class="btn btn-outline-n2m btn-sm">Remove</a>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">No saved newsletters. Browse the <a href="{% url 'content:newsletter_archive' %}">newsletter archive</a> and use “Save” on any issue.</p>
+        {% endif %}
+      </section>
+      {% endif %}
+
+      <p class="text-muted small">
+        <a href="{% url 'content:post_list' %}">Browse articles</a> &middot;
+        <a href="{% url 'content:review_list' %}">Browse reviews</a> &middot;
+        <a href="{% url 'content:newsletter_archive' %}">Newsletter archive</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,21 +1,23 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static display_counts %}
 
 {% block title %}{{ SITE_NAME }}{% endblock %}
-{% block meta_description %}{{ SITE_TAGLINE }} Technology, AI, Startups, and innovation. Africa and global context.{% endblock %}
+{% block meta_description %}{{ SITE_TAGLINE }} {{ SITE_DESCRIPTION }}{% endblock %}
+{% block body_class %}page-home{% endblock %}
 
 {% block content %}
-<section class="hero-n2m hero-n2m-attract mb-4 mb-md-5">
+<section class="hero-n2m hero-n2m-attract hero-n2m-home mb-4 mb-md-5">
   <div class="container text-center py-3 py-sm-4">
     <div class="hero-n2m-inner">
+      <p class="hero-n2m-brand small text-uppercase mb-2">{{ SITE_NAME }}</p>
       <div class="hero-n2m-title-wrap">
-        <h1 class="display-4">{{ SITE_NAME }}</h1>
+        <h1 class="display-5 display-md-4">{{ SITE_TAGLINE }}</h1>
         <span class="hero-n2m-accent" aria-hidden="true"></span>
       </div>
-      <p class="lead mx-auto">{{ SITE_TAGLINE }}</p>
+      <p class="lead mx-auto hero-n2m-supporting">{{ SITE_DESCRIPTION }}</p>
       <div class="hero-n2m-ctas">
-        <a href="{% url 'content:post_list' %}" class="btn btn-n2m btn-lg px-4 shadow-sm">Read Articles</a>
-        <a href="#newsletter" class="btn btn-outline-n2m btn-lg px-4">Subscribe</a>
+        <a href="#latest-stories" class="btn btn-n2m btn-lg px-4 shadow-sm">Explore the Latest</a>
+        <a href="#newsletter" class="btn btn-outline-n2m btn-lg px-4">Read the Newsletter</a>
       </div>
     </div>
   </div>
@@ -23,145 +25,226 @@
 
 <div class="container">
   {% if featured %}
-  <section class="mb-5 n2m-featured-section">
-    <h2 class="n2m-section-title">Featured story</h2>
-    <article class="card card-n2m overflow-hidden shadow-sm">
-      <div class="row g-0">
-        <div class="col-12 col-md-5 overflow-hidden n2m-featured-img-col">
-          {% if featured.featured_image %}
-          <img src="{{ featured.featured_image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ featured.title }}">
-          {% else %}
-          <div class="n2m-featured-img-placeholder bg-dark d-flex align-items-center justify-content-center w-100">
-            <span class="text-muted">No image</span>
-          </div>
-          {% endif %}
-        </div>
-        <div class="col-12 col-md-7">
-          <div class="card-body d-flex flex-column justify-content-center p-3 p-md-4">
-            <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-              {% if featured.category %}<a href="{{ featured.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none">{{ featured.category.name }}</a>{% endif %}
-              {% if not featured.published %}<span class="badge bg-secondary">Draft</span>{% endif %}
+  <section class="mb-5 n2m-featured-section n2m-home-featured">
+    <h2 class="n2m-section-title mb-3">Featured Story</h2>
+    <div class="row g-4">
+      <div class="col-12 {% if featured_secondary %}col-lg-8{% endif %}">
+        <article class="card card-n2m overflow-hidden shadow-sm h-100">
+          <div class="row g-0 h-100">
+            <div class="col-12 {% if featured_secondary %}col-md-6{% else %}col-md-5{% endif %} overflow-hidden n2m-featured-img-col">
+              {% if featured.featured_image or featured.gallery_image_count %}
+              <div id="postMediaHomeFeatured{{ featured.pk }}" class="carousel slide n2m-card-carousel h-100" data-bs-touch="true" data-bs-interval="false">
+                <div class="carousel-inner h-100">
+                  {% if featured.featured_image %}
+                  <div class="carousel-item active h-100">
+                    <img src="{{ featured.featured_image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ featured.title }}">
+                  </div>
+                  {% endif %}
+                  {% for m in featured.media_items.all %}
+                    {% if m.image %}
+                    <div class="carousel-item h-100 {% if not featured.featured_image and forloop.first %}active{% endif %}">
+                      <img src="{{ m.image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ featured.title }}">
+                    </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+              {% else %}
+              <div class="n2m-featured-img-placeholder bg-dark d-flex align-items-center justify-content-center w-100 h-100">
+                <span class="text-muted">No image</span>
+              </div>
+              {% endif %}
             </div>
-            <h3 class="card-title h3 mb-2"><a href="{% if featured.published %}{{ featured.get_absolute_url }}{% else %}#{% endif %}" class="text-decoration-none">{{ featured.title }}</a></h3>
-            <p class="card-text text-muted mb-3">{{ featured.excerpt|default:featured.content|truncatewords:32 }}</p>
-            <p class="text-muted small mb-3">{% if featured.published_at %}{{ featured.published_at|date:"F j, Y" }}{% else %}Draft · {{ featured.created_at|date:"F j, Y" }}{% endif %} · {{ featured.views }} views</p>
-            <a href="{% if featured.published %}{{ featured.get_absolute_url }}{% else %}#{% endif %}" class="btn btn-n2m align-self-start">Read more</a>
+            <div class="col-12 {% if featured_secondary %}col-md-6{% else %}col-md-7{% endif %}">
+              <div class="card-body d-flex flex-column justify-content-center p-3 p-md-4 h-100">
+                {% if featured.category %}<a href="{{ featured.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none align-self-start mb-2">{{ featured.category.name }}</a>{% endif %}
+                <h3 class="card-title h3 mb-2"><a href="{{ featured.get_absolute_url }}" class="text-decoration-none">{{ featured.title }}</a></h3>
+                <p class="card-text text-muted mb-3">{{ featured.excerpt|default:featured.content|truncatewords:40 }}</p>
+                <p class="text-muted small mb-3">{% if featured.published_at %}{{ featured.published_at|date:"F j, Y" }}{% endif %} &middot; {{ featured|public_view_count }} views</p>
+                {% include "content/partials/post_card_actions.html" with post=featured liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids next_url=request.path %}
+                <a href="{{ featured.get_absolute_url }}" class="btn btn-n2m align-self-start mt-2">Read the Story &rarr;</a>
+              </div>
+            </div>
           </div>
+        </article>
+      </div>
+      {% if featured_secondary %}
+      <div class="col-12 col-lg-4">
+        <div class="d-flex flex-column gap-3 h-100 n2m-featured-secondary">
+          {% for post in featured_secondary %}
+          <article class="card card-n2m flex-grow-1 n2m-featured-secondary-card">
+            <div class="card-body">
+              {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none mb-2">{{ post.category.name }}</a>{% endif %}
+              <h3 class="card-title h6 mb-2"><a href="{{ post.get_absolute_url }}" class="text-white text-decoration-none">{{ post.title|truncatewords:12 }}</a></h3>
+              <p class="card-text small text-muted mb-2">{{ post.excerpt|truncatewords:16|default:post.content|truncatewords:16 }}</p>
+              <a href="{{ post.get_absolute_url }}" class="small text-decoration-none">Read &rarr;</a>
+            </div>
+          </article>
+          {% endfor %}
         </div>
       </div>
-    </article>
+      {% endif %}
+    </div>
   </section>
   {% endif %}
 
-  <div class="row">
-    <div class="col-lg-8">
-      <section class="mb-5">
-        <div class="n2m-section-header">
-          <h2 class="n2m-section-title">Latest articles</h2>
-          <a href="{% url 'content:post_list' %}" class="n2m-section-more">More articles →</a>
-        </div>
-        <div class="row g-4">
-          {% for post in latest %}
-          <div class="col-md-6 col-lg-4">
-            <article class="card card-n2m h-100">
-              {% if post.featured_image %}
-              <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 180px; object-fit: cover;">
-              {% else %}
-              <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 180px;"><span class="text-muted small">No image</span></div>
-              {% endif %}
-              <div class="card-body">
-                <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-                  {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none">{{ post.category.name }}</a>{% endif %}
-                  {% if post.status != 'published' %}<span class="badge bg-secondary">Draft</span>{% endif %}
-                </div>
-                <h3 class="card-title h6"><a href="{% if post.published %}{{ post.get_absolute_url }}{% else %}#{% endif %}" class="text-white text-decoration-none">{{ post.title|truncatewords:8 }}</a></h3>
-                <p class="card-text small">{{ post.excerpt|truncatewords:15|default:post.content|truncatewords:15 }}</p>
-                <p class="text-muted small mb-0">{% if post.published_at %}{{ post.published_at|date:"M j, Y" }}{% else %}Draft · {{ post.created_at|date:"M j, Y" }}{% endif %}</p>
-              </div>
-            </article>
-          </div>
-          {% empty %}
-          <p class="text-muted">No articles yet.</p>
-          {% endfor %}
-        </div>
-      </section>
-
-      <section class="mb-5">
-        <div class="n2m-section-header">
-          <h2 class="n2m-section-title">Latest reviews</h2>
-          <a href="{% url 'content:review_list' %}" class="n2m-section-more">All reviews →</a>
-        </div>
-        <div class="row g-4">
-          {% for review in latest_reviews %}
-          <div class="col-md-6">
-            <article class="card card-n2m h-100 n2m-review-card">
-              {% if review.featured_image %}
-              <img src="{{ review.featured_image.url }}" class="card-img-top" alt="{{ review.title }}" style="height: 180px; object-fit: cover;">
-              {% else %}
-              <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 180px;"><span class="text-muted small">No image</span></div>
-              {% endif %}
-              <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                  <span class="badge bg-opacity-25 bg-success text-uppercase small n2m-review-label">Review</span>
-                  <div class="d-flex gap-2 align-items-center">
-                    {% if review.status != 'published' %}<span class="badge bg-secondary">Draft</span>{% endif %}
-                    {% if review.rating %}
-                    <span class="n2m-review-rating badge bg-success-subtle text-success">★ {{ review.rating }}/5</span>
-                    {% endif %}
-                  </div>
-                </div>
-                <h3 class="card-title h6 mb-1"><a href="{% if review.published %}{{ review.get_absolute_url }}{% else %}#{% endif %}" class="text-white text-decoration-none">{{ review.title|truncatewords:9 }}</a></h3>
-                <p class="small text-muted mb-2">{{ review.product_name }}</p>
-                <p class="card-text small mb-0">{{ review.summary|default:review.content|truncatewords:22 }}</p>
-              </div>
-            </article>
-          </div>
-          {% empty %}
-          <div class="col-12">
-            <p class="text-muted mb-0">No reviews yet. <a href="{% url 'content:review_list' %}">Browse reviews</a> or create one from your dashboard.</p>
-          </div>
-          {% endfor %}
-        </div>
-      </section>
-
-      <section class="mb-4 mb-lg-5 n2m-topics-block">
-        <h2 class="n2m-section-title">Explore by topic</h2>
-        <div class="n2m-topic-pills">
-          <a href="{% url 'content:category_ai' %}" class="btn btn-n2m-topic">AI</a>
-          <a href="{% url 'content:category_startups' %}" class="btn btn-n2m-topic">Startups</a>
-          <a href="{% url 'content:review_list' %}" class="btn btn-n2m-topic">Reviews</a>
-          <a href="{% url 'content:post_list' %}" class="btn btn-n2m-topic">All Articles</a>
-        </div>
-      </section>
+  <section id="latest-stories" class="mb-5">
+    <div class="n2m-section-header">
+      <h2 class="n2m-section-title">Latest Stories</h2>
+      <a href="{% url 'content:post_list' %}" class="n2m-section-more">All stories &rarr;</a>
     </div>
+    {% if latest_stories_fallback %}
+    <p class="text-muted small mb-3">From {{ NEWSLETTER_PRODUCT_NAME }} — our weekly editorial brief.</p>
+    {% endif %}
+    <div class="row g-4">
+      {% if latest_stories_fallback %}
+        {% for issue in latest %}
+        <div class="col-12 col-md-6 col-lg-4">
+          {% include "content/partials/newsletter_issue_card.html" with issue=issue liked_issue_ids=liked_newsletter_ids saved_issue_ids=saved_newsletter_ids show_excerpt=True show_view_count=newsletter_show_view_counts %}
+        </div>
+        {% empty %}
+        <p class="text-muted">Stories coming soon. Subscribe to {{ NEWSLETTER_PRODUCT_NAME }} below.</p>
+        {% endfor %}
+      {% else %}
+        {% for post in latest %}
+        <div class="col-12 col-md-6 col-lg-4">
+          {% include "content/partials/post_card_home.html" with post=post %}
+        </div>
+        {% empty %}
+        <p class="text-muted">Stories coming soon. Subscribe to {{ NEWSLETTER_PRODUCT_NAME }} below.</p>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </section>
 
-    <aside class="col-lg-4">
-      <section class="card card-n2m p-4 mb-4">
-        <h2 class="n2m-section-title mb-3">Most read</h2>
-        <ul class="n2m-most-read mb-0">
-          {% for post in trending %}
-          <li>
-            <a href="{{ post.get_absolute_url }}" class="text-break">{{ post.title|truncatewords:8 }}</a>
-            <span class="n2m-most-read-meta">{{ post.views }} views</span>
-          </li>
-          {% empty %}
-          <li class="n2m-most-read-empty text-muted small">No views yet.</li>
-          {% endfor %}
-        </ul>
-      </section>
+  {% for dept in departments %}
+  {% if dept.posts %}
+  <section class="mb-5 n2m-dept-section">
+    <div class="n2m-section-header">
+      <div>
+        <h2 class="n2m-section-title mb-1"><a href="{{ dept.category.get_absolute_url }}" class="text-decoration-none">{{ dept.category.name }}</a></h2>
+        <p class="text-muted small mb-0">{{ dept.blurb }}</p>
+      </div>
+      <a href="{{ dept.category.get_absolute_url }}" class="n2m-section-more">More &rarr;</a>
+    </div>
+    <div class="row g-4">
+      {% for post in dept.posts %}
+      <div class="col-12 col-md-6 col-lg-4">
+        {% include "content/partials/post_card_home.html" with post=post %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+  {% endfor %}
 
-      <section id="newsletter" class="card card-n2m card-n2m-newsletter p-4">
-        <h2 class="n2m-section-title mb-2">Stay in the loop</h2>
-        <p class="small text-muted mb-3">Get the best of N2M — tech, AI, startups — in your inbox.</p>
-        <form action="{% url 'content:newsletter_signup' %}" method="post">
-          {% csrf_token %}
-          <div class="input-group">
-            <input type="email" name="email" class="form-control" placeholder="Your email" required>
-            <button type="submit" class="btn btn-n2m">Subscribe</button>
+  <section class="mb-5">
+    <div class="n2m-section-header">
+      <div>
+        <h2 class="n2m-section-title mb-1">Reviews</h2>
+        <p class="text-muted small mb-0">Independent analysis of technology products and AI tools.</p>
+      </div>
+      <a href="{% url 'content:review_list' %}" class="n2m-section-more">All reviews &rarr;</a>
+    </div>
+    <div class="row g-4">
+      {% for review in latest_reviews %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="card card-n2m h-100 n2m-review-card">
+          {% if review.featured_image or review.gallery_image_count %}
+          <div id="reviewMediaHome{{ review.pk }}" class="carousel slide n2m-card-carousel" data-bs-touch="true" data-bs-interval="false">
+            <div class="carousel-inner">
+              {% if review.featured_image %}
+              <div class="carousel-item active">
+                <img src="{{ review.featured_image.url }}" class="card-img-top" alt="{{ review.title }}">
+              </div>
+              {% endif %}
+              {% for m in review.media_items.all %}
+                {% if m.image %}
+                <div class="carousel-item {% if not review.featured_image and forloop.first %}active{% endif %}">
+                  <img src="{{ m.image.url }}" class="card-img-top" alt="{{ review.title }}">
+                </div>
+                {% endif %}
+              {% endfor %}
+            </div>
           </div>
-        </form>
-      </section>
-    </aside>
-  </div>
+          {% else %}
+          <div class="card-img-top bg-dark d-flex align-items-center justify-content-center n2m-card-img-placeholder"><span class="text-muted small">No image</span></div>
+          {% endif %}
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="badge bg-opacity-25 bg-success text-uppercase small n2m-review-label">Review</span>
+              {% if review.rating %}<span class="n2m-review-rating badge bg-success-subtle text-success">★ {{ review.rating }}/5</span>{% endif %}
+            </div>
+            <h3 class="card-title h6 mb-1"><a href="{{ review.get_absolute_url }}" class="text-white text-decoration-none">{{ review.title|truncatewords:9 }}</a></h3>
+            <p class="small text-muted mb-2">{{ review.product_name }}</p>
+            <p class="card-text small mb-0">{{ review.summary|default:review.content|truncatewords:22 }}</p>
+            {% include "content/partials/review_card_actions.html" with review=review liked_review_ids=liked_review_ids bookmarked_review_ids=bookmarked_review_ids next_url=request.path %}
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <p class="text-muted mb-0">Reviews coming soon.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="mt-4 mb-5">
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <section class="card card-n2m p-4 h-100 n2m-sidebar-card-most-read">
+          <h2 class="n2m-section-title mb-3">Trending Now</h2>
+          <ul class="n2m-most-read mb-0">
+            {% for post in trending %}
+            <li>
+              <a href="{{ post.get_absolute_url }}" class="text-break">{{ post.title|truncatewords:12 }}</a>
+              <span class="n2m-most-read-meta">{{ post|public_view_count }} views</span>
+            </li>
+            {% empty %}
+            <li class="n2m-most-read-empty text-muted small">Trending stories will appear here.</li>
+            {% endfor %}
+          </ul>
+        </section>
+      </div>
+      <div class="col-12 col-lg-6">
+        <section class="card card-n2m p-4 h-100">
+          <div class="n2m-section-header mb-3">
+            <div>
+              <h2 class="n2m-section-title mb-1">{{ NEWSLETTER_PRODUCT_NAME }}</h2>
+              <p class="text-muted small mb-0">Weekly insights on technology, AI, business and startups — from Ethiopia, Africa and around the world.</p>
+            </div>
+          </div>
+          <div class="row g-3 mb-3">
+            {% for issue in latest_newsletters|slice:":3" %}
+            <div class="col-12">
+              <a href="{{ issue.get_absolute_url }}" class="d-block text-decoration-none n2m-brief-item">
+                <span class="fw-semibold">{{ issue.title }}</span>
+                <span class="text-muted small ms-1">&middot; {{ issue.sent_at|default:issue.posted_at|date:"M j, Y" }}</span>
+              </a>
+            </div>
+            {% empty %}
+            <p class="text-muted small mb-0">First issue coming soon.</p>
+            {% endfor %}
+          </div>
+          <a href="{% url 'content:newsletter_archive' %}" class="d-inline-block small mb-0">Browse all issues &rarr;</a>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section id="newsletter" class="mb-5">
+    <div class="card card-n2m card-n2m-newsletter p-4 p-md-5 text-center">
+      <h2 class="n2m-section-title mb-2">Subscribe to {{ NEWSLETTER_PRODUCT_NAME }}</h2>
+      <p class="text-muted mx-auto mb-4 n2m-newsletter-lead">Get our weekly selection of the technology, AI, business and startup stories that matter — delivered to your inbox.</p>
+      <form action="{% url 'content:newsletter_signup' %}" method="post" class="newsletter-signup-form mx-auto n2m-newsletter-form-inline">
+        {% csrf_token %}
+        <div class="input-group">
+          <input type="email" name="email" class="form-control" placeholder="Your email address" required aria-label="Email address">
+          <button type="submit" class="btn btn-n2m">Subscribe</button>
+        </div>
+      </form>
+    </div>
+  </section>
 </div>
 {% endblock %}

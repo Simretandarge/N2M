@@ -1,0 +1,19 @@
+{# media_queryset: related manager .all (e.g. post.media_items.all); title: optional heading #}
+{% if media_queryset %}
+<section class="mb-3">
+  <h3 class="h6 text-white mb-2">{{ title|default:"Already uploaded" }}</h3>
+  <div class="n2m-media-grid">
+    {% for m in media_queryset %}
+      {% if m.image %}
+      <a href="{{ m.image.url }}" target="_blank" rel="noopener" class="n2m-media-tile" aria-label="Open image">
+        <img src="{{ m.image.url }}" alt="" class="n2m-media-thumb">
+      </a>
+      {% elif m.video %}
+      <a href="{{ m.video.url }}" target="_blank" rel="noopener" class="n2m-media-tile n2m-media-tile-video" aria-label="Open video">
+        <span class="n2m-media-tile-label">Video</span>
+      </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

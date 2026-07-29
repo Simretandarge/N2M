@@ -50,6 +50,12 @@
           {% if form.content.errors %}<div class="form-text text-danger">{{ form.content.errors }}</div>{% endif %}
         </div>
         <div class="mb-3">
+          <label for="id_instagram_post_url" class="form-label text-white">Instagram post or reel URL</label>
+          {{ form.instagram_post_url }}
+          <div class="form-text text-muted">Optional. Your @next251media link for share → Instagram.</div>
+          {% if form.instagram_post_url.errors %}<div class="form-text text-danger">{{ form.instagram_post_url.errors }}</div>{% endif %}
+        </div>
+        <div class="mb-3">
           <label for="id_pros" class="form-label text-white">Pros</label>
           {{ form.pros }}
           <div class="form-text text-muted">One per line or comma-separated.</div>
@@ -61,12 +67,10 @@
           <div class="form-text text-muted">One per line or comma-separated.</div>
           {% if form.cons.errors %}<div class="form-text text-danger">{{ form.cons.errors }}</div>{% endif %}
         </div>
-        <div class="mb-4">
-          <label for="id_featured_image" class="form-label text-white">Featured image</label>
-          {{ form.featured_image }}
-          {% if review and review.featured_image %}<p class="mt-2 mb-0 small text-muted">Current: <a href="{{ review.featured_image.url }}" target="_blank" rel="noopener">{{ review.featured_image.name }}</a></p>{% endif %}
-          {% if form.featured_image.errors %}<div class="form-text text-danger">{{ form.featured_image.errors }}</div>{% endif %}
-        </div>
+        {% if review %}
+        {% include "content/partials/extra_media_gallery_list.html" with media_queryset=review.media_items.all title="Gallery — extra images & videos (saved)" %}
+        {% endif %}
+        {% include "content/partials/instagram_media_upload.html" with cover_image_field=form.featured_image cover_video_field=form.featured_video extra_images_field=form.extra_images extra_videos_field=form.extra_videos %}
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-n2m">Save draft</button>
           <a href="{% url 'content:writer_review_list' %}" class="btn btn-outline-n2m">Cancel</a>

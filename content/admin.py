@@ -3,7 +3,18 @@ Django admin for content: draft/publish workflow, featured toggle.
 Roles: Admin (full), Editor (publish/edit all), Writer (own drafts only).
 """
 from django.contrib import admin
-from .models import Category, Post, Review, NewsletterSubscriber
+from django.db.models import Count
+from .models import (
+    Category,
+    Post,
+    PostLike,
+    PostComment,
+    Review,
+    ReviewLike,
+    ReviewComment,
+    NewsletterSubscriber,
+    NewsletterIssue,
+)
 
 
 def user_is_writer(user):
@@ -42,22 +53,49 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'category', 'status', 'is_featured', 'published_at', 'views')
+    list_display = (
+        'title', 'author', 'category', 'status', 'is_featured', 'published_at',
+        'views', 'real_likes_display', 'real_saves_display',
+    )
     list_filter = ('status', 'is_featured', 'category')
     list_editable = ('status', 'is_featured')
     search_fields = ('title', 'excerpt', 'content')
     prepopulated_fields = {'slug': ('title',)}
-    readonly_fields = ('views', 'published_at', 'created_at', 'updated_at')
+    readonly_fields = (
+        'views', 'published_at', 'created_at', 'updated_at',
+        'real_likes_display', 'real_saves_display',
+    )
     date_hierarchy = 'published_at'
     fieldsets = (
         (None, {'fields': ('title', 'slug', 'excerpt', 'content', 'featured_image')}),
+        ('Social', {'fields': ('instagram_post_url',), 'description': 'Paste the Instagram post/reel link after you publish there; share uses it for “Open Instagram”.'}),
         ('Organization', {'fields': ('category', 'author', 'is_featured')}),
-        ('Publishing', {'fields': ('status', 'published_at', 'views')}),
+        (
+            'Publishing',
+            {
+                'fields': (
+                    'status', 'published_at', 'views',
+                    'real_likes_display', 'real_saves_display',
+                ),
+            },
+        ),
         ('Timestamps', {'fields': ('created_at', 'updated_at')}),
     )
 
+    @admin.display(description='Likes (real)', ordering='_real_likes')
+    def real_likes_display(self, obj):
+        return getattr(obj, '_real_likes', obj.likes.count())
+
+    @admin.display(description='Saves (real)', ordering='_real_saves')
+    def real_saves_display(self, obj):
+        return getattr(obj, '_real_saves', obj.bookmarked_by.count())
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
+        qs = qs.annotate(
+            _real_likes=Count('likes', distinct=True),
+            _real_saves=Count('bookmarked_by', distinct=True),
+        )
         if user_is_writer(request.user):
             return qs.filter(author=request.user)
         return qs
@@ -88,9 +126,31 @@ class PostAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+@admin.register(PostLike)
+class PostLikeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user__username', 'post__title')
+
+
+@admin.register(PostComment)
+class PostCommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'text_preview', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user__username', 'post__title', 'text')
+    readonly_fields = ('user', 'post', 'created_at')
+
+    def text_preview(self, obj):
+        return (obj.text[:60] + '…') if len(obj.text) > 60 else obj.text
+    text_preview.short_description = 'Comment'
+
+
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'product_name', 'status', 'rating', 'published_at')
+    list_display = (
+        'title', 'author', 'product_name', 'status', 'rating', 'published_at',
+        'real_likes_display', 'real_saves_display',
+    )
     list_filter = ('status', 'rating')
     list_editable = ('status',)
     search_fields = ('title', 'product_name', 'summary', 'content')
@@ -103,7 +163,10 @@ class ReviewAdmin(admin.ModelAdmin):
         return super().get_changelist_instance(request)
 
     prepopulated_fields = {'slug': ('title',)}
-    readonly_fields = ('published_at', 'created_at', 'updated_at')
+    readonly_fields = (
+        'published_at', 'created_at', 'updated_at',
+        'real_likes_display', 'real_saves_display',
+    )
     date_hierarchy = 'published_at'
 
     def get_readonly_fields(self, request, obj=None):
@@ -114,14 +177,30 @@ class ReviewAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {'fields': ('title', 'slug', 'product_name', 'summary', 'content', 'featured_image')}),
+        ('Social', {'fields': ('instagram_post_url',)}),
         ('Review details', {'fields': ('rating', 'pros', 'cons')}),
         ('Organization', {'fields': ('author',)}),
-        ('Publishing', {'fields': ('status', 'published_at')}),
+        (
+            'Publishing',
+            {'fields': ('status', 'published_at', 'real_likes_display', 'real_saves_display')},
+        ),
         ('Timestamps', {'fields': ('created_at', 'updated_at')}),
     )
 
+    @admin.display(description='Likes (real)', ordering='_real_likes')
+    def real_likes_display(self, obj):
+        return getattr(obj, '_real_likes', obj.likes.count())
+
+    @admin.display(description='Saves (real)', ordering='_real_saves')
+    def real_saves_display(self, obj):
+        return getattr(obj, '_real_saves', obj.bookmarked_by.count())
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
+        qs = qs.annotate(
+            _real_likes=Count('likes', distinct=True),
+            _real_saves=Count('bookmarked_by', distinct=True),
+        )
         if user_is_writer(request.user):
             return qs.filter(author=request.user)
         return qs
@@ -137,9 +216,58 @@ class ReviewAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+@admin.register(ReviewLike)
+class ReviewLikeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'review', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user__username', 'review__title')
+
+
+@admin.register(ReviewComment)
+class ReviewCommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'review', 'text_preview', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user__username', 'review__title', 'text')
+    readonly_fields = ('user', 'review', 'created_at')
+
+    def text_preview(self, obj):
+        return (obj.text[:60] + '…') if len(obj.text) > 60 else obj.text
+    text_preview.short_description = 'Comment'
+
+
+@admin.register(NewsletterIssue)
+class NewsletterIssueAdmin(admin.ModelAdmin):
+    list_display = (
+        'title', 'created_by', 'views', 'real_likes_display', 'real_saves_display',
+        'created_at', 'sent_at',
+    )
+    list_filter = ('sent_at',)
+    search_fields = ('title', 'content')
+    readonly_fields = (
+        'created_at', 'sent_at', 'views',
+        'real_likes_display', 'real_saves_display',
+    )
+
+    @admin.display(description='Likes (real)', ordering='_real_likes')
+    def real_likes_display(self, obj):
+        return getattr(obj, '_real_likes', obj.likes.count())
+
+    @admin.display(description='Saves (real)', ordering='_real_saves')
+    def real_saves_display(self, obj):
+        return getattr(obj, '_real_saves', obj.bookmarked_by.count())
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.annotate(
+            _real_likes=Count('likes', distinct=True),
+            _real_saves=Count('bookmarked_by', distinct=True),
+        )
+
+
 @admin.register(NewsletterSubscriber)
 class NewsletterSubscriberAdmin(admin.ModelAdmin):
-    list_display = ('email', 'created_at')
+    list_display = ('email', 'frequency', 'created_at')
+    list_filter = ('frequency',)
     search_fields = ('email',)
     readonly_fields = ('created_at',)
 

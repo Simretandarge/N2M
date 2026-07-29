@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Profile overview{% endblock %}
+{% block meta_description %}Your profile overview. Articles, reviews, newsletter, bookmarks.{% endblock %}
+{% block content_col_class %}col-12{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <nav class="mb-4">
+        <a href="{% url 'accounts:profile' %}" class="text-muted small text-decoration-none">← Profile</a>
+      </nav>
+      <h1 class="h2 text-white mb-2">Profile overview</h1>
+      <p class="text-muted mb-4">Articles, reviews, newsletter, and your bookmarks. <a href="{% url 'accounts:profile' %}">Edit your profile and apply to be a writer</a>.</p>
+
+      <!-- Bookmarks -->
+      <section class="card card-n2m p-4 mb-4">
+        <h2 class="h5 text-white mb-3">Bookmarks</h2>
+        <p class="text-muted small mb-3">Articles, reviews, and newsletters you saved for later.</p>
+        <p class="display-6 text-white fw-bold mb-0">{{ bookmarks_count }}</p>
+        <a href="{% url 'reader:account_bookmarks' %}" class="btn btn-n2m btn-sm mt-2">View all bookmarks</a>
+      </section>
+
+      <!-- Articles -->
+      <section class="card card-n2m p-4 mb-4">
+        <h2 class="h5 text-white mb-3">Articles</h2>
+        <p class="text-muted small mb-3">Read and save articles. Bookmark any article with “Save this article”.</p>
+        <a href="{% url 'content:post_list' %}" class="btn btn-n2m btn-sm mb-3">View all articles</a>
+        {% if latest_articles %}
+        <ul class="list-unstyled mb-0">
+          {% for post in latest_articles %}
+          <li class="mb-2">
+            <a href="{{ post.get_absolute_url }}" class="text-decoration-none">{{ post.title }}</a>
+            {% if post.category %}<span class="badge badge-n2m ms-2">{{ post.category.name }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">No articles yet.</p>
+        {% endif %}
+      </section>
+
+      <!-- Reviews -->
+      <section class="card card-n2m p-4 mb-4">
+        <h2 class="h5 text-white mb-3">Reviews</h2>
+        <p class="text-muted small mb-3">Product and tool reviews.</p>
+        <a href="{% url 'content:review_list' %}" class="btn btn-n2m btn-sm mb-3">View all reviews</a>
+        {% if latest_reviews %}
+        <ul class="list-unstyled mb-0">
+          {% for review in latest_reviews %}
+          <li class="mb-2">
+            <a href="{{ review.get_absolute_url }}" class="text-decoration-none">{{ review.title }}</a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">No reviews yet.</p>
+        {% endif %}
+      </section>
+
+      <!-- Newsletter -->
+      <section class="card card-n2m p-4 mb-4">
+        <h2 class="h5 text-white mb-3">Newsletter</h2>
+        <p class="text-muted small mb-3">Get weekly insights — tech, AI, startups — in your inbox.</p>
+        {% if is_subscribed_newsletter %}
+        <p class="text-success small mb-2">You’re subscribed ({{ user.email }}).</p>
+        {% else %}
+        <p class="text-muted small mb-2">You’re not subscribed yet.</p>
+        {% endif %}
+        <a href="{% url 'reader:account_preferences' %}" class="btn btn-outline-n2m btn-sm me-2">Preferences</a>
+        <a href="{% url 'content:newsletter_archive' %}" class="btn btn-outline-n2m btn-sm me-2">Past newsletters</a>
+        <a href="{% url 'content:home' %}#newsletter" class="btn btn-outline-n2m btn-sm">Newsletter signup on home</a>
+      </section>
+
+      <!-- Profile & topics -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="card card-n2m p-4 h-100">
+            <h2 class="h6 text-white mb-2">Preferences</h2>
+            <p class="text-muted small mb-3">Topics you follow (AI, Startups, Reviews) and weekly newsletter.</p>
+            <a href="{% url 'reader:account_preferences' %}" class="btn btn-outline-n2m btn-sm">Edit preferences</a>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card card-n2m p-4 h-100">
+            <h2 class="h6 text-white mb-2">Profile</h2>
+            <p class="text-muted small mb-3">Name, email, password, and apply to be a writer.</p>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-n2m btn-sm">Edit profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

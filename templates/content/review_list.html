@@ -29,20 +29,48 @@
     </div>
   </div>
 
-  <div class="row g-4">
+  <div class="row g-4 n2m-reels-feed">
     {% for review in page_obj %}
     <div class="col-md-6 col-lg-4">
       <article class="card card-n2m h-100">
-        {% if review.featured_image %}
-        <img src="{{ review.featured_image.url }}" class="card-img-top" alt="{{ review.title }}" style="height: 200px; object-fit: cover;">
+        {% if review.featured_image or review.gallery_image_count %}
+        <div id="reviewMediaList{{ review.pk }}" class="carousel slide n2m-card-carousel" data-bs-touch="true" data-bs-interval="false">
+          <div class="carousel-inner">
+            {% if review.featured_image %}
+            <div class="carousel-item active">
+              <img src="{{ review.featured_image.url }}" class="card-img-top" alt="{{ review.title }}">
+            </div>
+            {% endif %}
+            {% for m in review.media_items.all %}
+              {% if m.image %}
+              <div class="carousel-item {% if not review.featured_image and forloop.first %}active{% endif %}">
+                <img src="{{ m.image.url }}" class="card-img-top" alt="{{ review.title }}">
+              </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% if review.gallery_image_count > 1 or review.featured_image and review.gallery_image_count > 0 %}
+          <button class="carousel-control-prev n2m-card-carousel-control" type="button" data-bs-target="#reviewMediaList{{ review.pk }}" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button class="carousel-control-next n2m-card-carousel-control" type="button" data-bs-target="#reviewMediaList{{ review.pk }}" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+          <div class="carousel-indicators n2m-card-carousel-indicators">
+            {% if review.featured_image %}<button type="button" data-bs-target="#reviewMediaList{{ review.pk }}" data-bs-slide-to="0" class="active" aria-current="true"></button>{% endif %}
+            {% for m in review.media_items.all %}{% if m.image %}<button type="button" data-bs-target="#reviewMediaList{{ review.pk }}" data-bs-slide-to="{% if review.featured_image %}{{ forloop.counter }}{% else %}{{ forloop.counter0 }}{% endif %}" {% if not review.featured_image and forloop.first %}class="active" aria-current="true"{% endif %}></button>{% endif %}{% endfor %}
+          </div>
+          {% endif %}
+        </div>
         {% else %}
-        <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 200px;"><span class="text-muted small">No image</span></div>
+        <div class="card-img-top bg-dark d-flex align-items-center justify-content-center"><span class="text-muted small">No image</span></div>
         {% endif %}
         <div class="card-body">
           {% if review.rating %}<span class="badge badge-n2m mb-2">{{ review.rating }}/5</span>{% endif %}
           <h2 class="card-title h6"><a href="{{ review.get_absolute_url }}" class="text-white text-decoration-none">{{ review.title }}</a></h2>
           <p class="card-text small">{{ review.summary|truncatewords:20|default:review.content|truncatewords:20 }}</p>
-          <p class="text-muted small mb-0">{{ review.published_at|date:"F j, Y" }}</p>
+          <p class="text-muted small mb-2">{{ review.published_at|date:"F j, Y" }}</p>
+          {% include "content/partials/review_card_actions.html" with review=review liked_review_ids=liked_review_ids bookmarked_review_ids=bookmarked_review_ids next_url=request.path %}
         </div>
       </article>
     </div>

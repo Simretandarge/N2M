@@ -2,25 +2,108 @@
 
 {% block title %}Profile{% endblock %}
 {% block meta_description %}Your Next 251 Media profile.{% endblock %}
+{% block content_col_class %}col-12{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-      <div class="card card-n2m p-4">
-        <h1 class="h3 text-white mb-4">Profile</h1>
-        <form method="post" action="{% url 'accounts:profile' %}">
-          {% csrf_token %}
-          {% for field in form %}
-          <div class="mb-3">
-            <label for="{{ field.id_for_label }}" class="form-label text-white">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}<div class="form-text text-danger">{{ field.errors }}</div>{% endif %}
-          </div>
-          {% endfor %}
-          <button type="submit" class="btn btn-n2m w-100">Save changes</button>
-        </form>
-        <p class="mt-4 mb-0 text-muted small"><a href="{% url 'accounts:password_change' %}">Change password</a></p>
+  <div class="row g-4 n2m-profile-shell">
+    <div class="col-12 col-xl-10 mx-auto">
+      <div class="row g-4">
+        <div class="col-12 col-lg-4">
+          <section class="card card-n2m p-4 n2m-profile-summary h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="n2m-profile-avatar">
+                {% if profile_photo %}
+                <img src="{{ profile_photo.url }}" alt="{{ user.username }}" class="n2m-profile-avatar-img">
+                {% else %}
+                {{ user.get_short_name|default:user.username|slice:":1"|upper }}
+                {% endif %}
+              </div>
+              <div>
+                <h1 class="h4 mb-1">{{ user.username }}</h1>
+                <p class="text-muted small mb-1">{{ user.get_full_name|default:"No full name yet" }}</p>
+                <span class="badge badge-n2m text-decoration-none">{{ user_role|title }}</span>
+              </div>
+            </div>
+            <p class="text-muted small mb-3">Joined {{ user.date_joined|date:"F Y" }}</p>
+
+            <div class="n2m-profile-stats">
+              <div class="n2m-profile-stat">
+                <div class="n2m-profile-stat-value">{{ liked_count }}</div>
+                <div class="n2m-profile-stat-label">Liked</div>
+              </div>
+              <div class="n2m-profile-stat">
+                <div class="n2m-profile-stat-value">{{ bookmarks_count }}</div>
+                <div class="n2m-profile-stat-label">Bookmarks</div>
+              </div>
+              <div class="n2m-profile-stat">
+                <div class="n2m-profile-stat-value">{{ followed_topics }}</div>
+                <div class="n2m-profile-stat-label">Topics</div>
+              </div>
+            </div>
+
+            {% if user_role == 'reader' %}
+            <hr class="border-secondary my-3">
+            <h2 class="h6 text-white mb-2">Contribute</h2>
+            <p class="text-muted small mb-3">Apply to become a writer and start publishing.</p>
+            {% if writer_application_pending %}
+            <a href="{% url 'accounts:writer_apply' %}" class="btn btn-outline-n2m btn-sm">View application</a>
+            {% else %}
+            <a href="{% url 'accounts:writer_apply' %}" class="btn btn-n2m btn-sm">Apply to be a writer</a>
+            {% endif %}
+            {% elif user_role == 'writer' %}
+            <hr class="border-secondary my-3">
+            <h2 class="h6 text-white mb-2">Contribute</h2>
+            <p class="text-muted small mb-3">Apply to become an editor and help review submissions.</p>
+            {% if editor_application_pending %}
+            <a href="{% url 'accounts:editor_apply' %}" class="btn btn-outline-n2m btn-sm">View application</a>
+            {% else %}
+            <a href="{% url 'accounts:editor_apply' %}" class="btn btn-n2m btn-sm">Apply to be an editor</a>
+            {% endif %}
+            {% endif %}
+          </section>
+        </div>
+
+        <div class="col-12 col-lg-8">
+          <section class="card card-n2m p-4">
+            <h2 class="h5 text-white mb-3">Edit profile</h2>
+            <form method="post" action="{% url 'accounts:profile' %}" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="id_photo" class="form-label text-white">Profile photo</label>
+                <input type="file" class="form-control" id="id_photo" name="photo" accept="image/*">
+              </div>
+
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label for="{{ form.username.id_for_label }}" class="form-label text-white">{{ form.username.label }}</label>
+                  {{ form.username }}
+                  {% if form.username.errors %}<div class="form-text text-danger">{{ form.username.errors }}</div>{% endif %}
+                </div>
+                <div class="col-12 col-md-6">
+                  <label for="{{ form.email.id_for_label }}" class="form-label text-white">{{ form.email.label }}</label>
+                  {{ form.email }}
+                  {% if form.email.errors %}<div class="form-text text-danger">{{ form.email.errors }}</div>{% endif %}
+                </div>
+                <div class="col-12 col-md-6">
+                  <label for="{{ form.first_name.id_for_label }}" class="form-label text-white">{{ form.first_name.label }}</label>
+                  {{ form.first_name }}
+                  {% if form.first_name.errors %}<div class="form-text text-danger">{{ form.first_name.errors }}</div>{% endif %}
+                </div>
+                <div class="col-12 col-md-6">
+                  <label for="{{ form.last_name.id_for_label }}" class="form-label text-white">{{ form.last_name.label }}</label>
+                  {{ form.last_name }}
+                  {% if form.last_name.errors %}<div class="form-text text-danger">{{ form.last_name.errors }}</div>{% endif %}
+                </div>
+              </div>
+
+              <div class="mt-4 d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-n2m">Save changes</button>
+                <a href="{% url 'reader:account_settings' %}" class="btn btn-outline-n2m">Open settings</a>
+              </div>
+            </form>
+          </section>
+        </div>
       </div>
     </div>
   </div>

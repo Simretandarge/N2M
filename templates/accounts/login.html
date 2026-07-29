@@ -26,7 +26,7 @@
           <button type="submit" class="btn btn-n2m w-100">Sign in</button>
         </form>
         <p class="mt-4 mb-0 text-muted small"><a href="{% url 'accounts:password_reset' %}">Forgot password?</a></p>
-        <p class="mt-2 mb-0 text-muted small">Don't have an account? <a href="{% url 'accounts:signup' %}">Sign up</a></p>
+        <p class="mt-2 mb-0 text-muted small">Don't have an account? <a href="{% url 'accounts:signup' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create account</a> (readers)</p>
       </div>
     </div>
   </div>

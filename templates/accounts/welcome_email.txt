@@ -1,0 +1,16 @@
+Hi {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %},
+
+Welcome to {{ site_name }}. {{ tagline }}
+
+Here’s what you can do with your account:
+
+• Save articles — Use “Save this article” on any post to read later.
+• Set preferences — Choose topics you follow (AI, Startups, Reviews) and get weekly insights.
+• Bookmark and read — All your saved articles in one place: {{ account_url }}
+
+Visit your account: {{ account_url }}
+Browse articles: {{ home_url }}
+
+If you have questions, reply to this email or use our contact page.
+
+— The {{ site_name }} team

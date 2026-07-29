@@ -5,13 +5,14 @@
     {% if user_role == 'admin' %}
       <ul class="list-unstyled small mb-0">
         <li class="mb-2"><a href="{% url 'accounts:dashboard_admin' %}">Admin dashboard</a></li>
-        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}?mine=1">My posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}?mine=1">My articles</a></li>
         <li class="mb-2"><a href="{% url 'content:manage_review_list' %}?mine=1">My reviews</a></li>
         <li class="mb-2"><a href="{% url 'accounts:review_drafts' %}">Review drafts</a></li>
-        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}">All posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}">All articles</a></li>
         <li class="mb-2"><a href="{% url 'content:manage_review_list' %}">All reviews</a></li>
         <li class="mb-2"><a href="{% url 'content:manage_category_list' %}">Categories</a></li>
         <li class="mb-2"><a href="{% url 'accounts:user_list' %}">Manage users</a></li>
+        <li class="mb-2"><a href="{% url 'accounts:writer_applications_list' %}">Writer applications</a></li>
         <li class="mb-2"><a href="{% url 'accounts:editor_applications_list' %}">Editor applications</a></li>
         <li class="mb-2"><a href="/admin/" target="_blank" rel="noopener">Open Django Admin</a></li>
         <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
@@ -19,10 +20,10 @@
     {% elif user_role == 'editor' %}
       <ul class="list-unstyled small mb-0">
         <li class="mb-2"><a href="{% url 'accounts:dashboard_editor' %}">Editor dashboard</a></li>
-        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}?mine=1">My posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}?mine=1">My articles</a></li>
         <li class="mb-2"><a href="{% url 'content:manage_review_list' %}?mine=1">My reviews</a></li>
         <li class="mb-2"><a href="{% url 'accounts:review_drafts' %}">Review drafts</a></li>
-        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}">All posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:manage_post_list' %}">All articles</a></li>
         <li class="mb-2"><a href="{% url 'content:manage_review_list' %}">All reviews</a></li>
         <li class="mb-2"><a href="{% url 'content:manage_category_list' %}">Categories</a></li>
         <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
@@ -30,20 +31,22 @@
     {% elif user_role == 'writer' %}
       <ul class="list-unstyled small mb-0">
         <li class="mb-2"><a href="{% url 'accounts:dashboard_writer' %}">Writer dashboard</a></li>
-        <li class="mb-2"><a href="{% url 'content:writer_post_create' %}">New post</a></li>
-        <li class="mb-2"><a href="{% url 'content:writer_post_list' %}">Your posts</a></li>
+        <li class="mb-2"><a href="{% url 'content:writer_post_create' %}">New article</a></li>
+        <li class="mb-2"><a href="{% url 'content:writer_post_list' %}">Your articles</a></li>
         <li class="mb-2"><a href="{% url 'content:writer_review_create' %}">New review</a></li>
         <li class="mb-2"><a href="{% url 'content:writer_review_list' %}">Your reviews</a></li>
         <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
       </ul>
     {% else %}
       <ul class="list-unstyled small mb-0">
-        <li class="mb-2"><a href="{% url 'accounts:dashboard_reader' %}">Dashboard</a></li>
-        <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+        <li class="mb-2"><a href="{% url 'reader:account_settings' %}">Settings</a></li>
+        <li class="mb-2"><a href="{% url 'accounts:profile' %}">Profile</a></li>
+        <li><a href="{% url 'reader:account_bookmarks' %}">Bookmarks</a></li>
+        <li><a href="{% url 'reader:account_preferences' %}">Preferences</a></li>
       </ul>
     {% endif %}
   {% else %}
-    <h6 class="text-white mb-3">Account</h6>
+    <h6 class="text-white mb-3">Profile</h6>
     <p class="small text-muted mb-2">Sign in for your dashboard and profile.</p>
     <a href="{% url 'accounts:login' %}" class="btn btn-n2m btn-sm w-100 mb-2">Sign in</a>
     <a href="{% url 'accounts:signup' %}" class="btn btn-outline-n2m btn-sm w-100">Sign up</a>

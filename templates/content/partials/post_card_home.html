@@ -1,0 +1,40 @@
+{% load display_counts %}
+<article class="card card-n2m h-100">
+  {% if post.featured_image or post.gallery_image_count %}
+  <div id="postMediaHome{{ post.pk }}" class="carousel slide n2m-card-carousel" data-bs-touch="true" data-bs-interval="false">
+    <div class="carousel-inner">
+      {% if post.featured_image %}
+      <div class="carousel-item active">
+        <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}">
+      </div>
+      {% endif %}
+      {% for m in post.media_items.all %}
+        {% if m.image %}
+        <div class="carousel-item {% if not post.featured_image and forloop.first %}active{% endif %}">
+          <img src="{{ m.image.url }}" class="card-img-top" alt="{{ post.title }}">
+        </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% if post.gallery_image_count > 1 or post.featured_image and post.gallery_image_count > 0 %}
+    <button class="carousel-control-prev n2m-card-carousel-control" type="button" data-bs-target="#postMediaHome{{ post.pk }}" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next n2m-card-carousel-control" type="button" data-bs-target="#postMediaHome{{ post.pk }}" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="card-img-top bg-dark d-flex align-items-center justify-content-center n2m-card-img-placeholder"><span class="text-muted small">No image</span></div>
+  {% endif %}
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+      {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="badge badge-n2m text-decoration-none">{{ post.category.name }}</a>{% endif %}
+    </div>
+    <h3 class="card-title h6"><a href="{{ post.get_absolute_url }}" class="text-white text-decoration-none">{{ post.title|truncatewords:10 }}</a></h3>
+    <p class="card-text small text-muted mb-2">{{ post.excerpt|truncatewords:18|default:post.content|truncatewords:18 }}</p>
+    <p class="text-muted small mb-0">{% if post.published_at %}{{ post.published_at|date:"M j, Y" }}{% endif %}</p>
+    {% include "content/partials/post_card_actions.html" with post=post liked_post_ids=liked_post_ids bookmarked_post_ids=bookmarked_post_ids next_url=request.path %}
+  </div>
+</article>

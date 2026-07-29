@@ -13,8 +13,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Categories
         ai, _ = Category.objects.get_or_create(slug='ai', defaults={'name': 'AI'})
+        technology, _ = Category.objects.get_or_create(slug='technology', defaults={'name': 'Technology'})
+        business, _ = Category.objects.get_or_create(slug='business', defaults={'name': 'Business'})
         startups, _ = Category.objects.get_or_create(slug='startups', defaults={'name': 'Startups'})
-        self.stdout.write('Categories: AI, Startups')
+        innovation, _ = Category.objects.get_or_create(slug='innovation', defaults={'name': 'Innovation'})
+        self.stdout.write('Categories: Technology, AI, Business, Startups, Innovation')
 
         # Sample posts (only create if none exist)
         if Post.objects.filter(status='published').exists():

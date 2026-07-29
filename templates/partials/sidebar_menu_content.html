@@ -1,74 +1,89 @@
 {% load static %}
 {% if not user.is_authenticated %}
-{# Guests: show site navigation #}
+{# Guests: no content bar; only sign in / create account #}
+<div class="mb-4">
+  <p class="text-muted small mb-3">Sign in or create a reader account to access bookmarks and preferences.</p>
+  <a href="{% url 'accounts:login' %}" class="btn btn-n2m btn-sm w-100 mb-2">Sign in</a>
+  <a href="{% url 'accounts:signup' %}" class="btn btn-outline-n2m btn-sm w-100">Create account</a>
+</div>
+{% else %}
+{# Logged in: for readers show only reader menu; for others show content nav then role section #}
+{% if user_role != 'reader' %}
 <h6 class="n2m-menu-title text-uppercase mb-3">Content</h6>
 <ul class="list-unstyled n2m-menu-list mb-4">
   <li><a href="{% url 'content:home' %}">Home</a></li>
   <li><a href="{% url 'content:post_list' %}">Posts</a></li>
   <li><a href="{% url 'content:review_list' %}">Reviews</a></li>
-  {% for cat in nav_categories %}
-  <li>{% if cat.slug == 'ai' %}<a href="{% url 'content:category_ai' %}">{{ cat.name }}</a>{% elif cat.slug == 'startups' %}<a href="{% url 'content:category_startups' %}">{{ cat.name }}</a>{% else %}<a href="{% url 'content:category_detail' cat.slug %}">{{ cat.name }}</a>{% endif %}</li>
+  {% for dept in nav_departments %}
+  <li><a href="{{ dept.get_absolute_url }}">{{ dept.name }}</a></li>
   {% empty %}
+  <li><a href="{% url 'content:category_technology' %}">Technology</a></li>
   <li><a href="{% url 'content:category_ai' %}">AI</a></li>
+  <li><a href="{% url 'content:category_business' %}">Business</a></li>
   <li><a href="{% url 'content:category_startups' %}">Startups</a></li>
+  <li><a href="{% url 'content:category_innovation' %}">Innovation</a></li>
   {% endfor %}
   <li><a href="{% url 'content:about' %}">About</a></li>
   <li><a href="{% url 'content:contact' %}">Contact</a></li>
+  <li><a href="{% url 'content:newsletter_archive' %}">Newsletter</a></li>
 </ul>
-{% else %}
-{# Logged in: show only this user's role section #}
+{% endif %}
 <h6 class="n2m-menu-title text-uppercase mb-3">{{ user_role_label }}</h6>
 {% if user_role == 'admin' %}
-<ul class="list-unstyled n2m-menu-list mb-4">
+<ul class="list-unstyled n2m-menu-list mb-4" aria-label="Admin menu">
   <li><a href="{% url 'accounts:dashboard_admin' %}">Admin dashboard</a></li>
-  <li><a href="{% url 'content:manage_post_list' %}?mine=1">My posts</a></li>
+  <li><a href="{% url 'content:manage_post_list' %}?mine=1">My articles</a></li>
   <li><a href="{% url 'content:manage_review_list' %}?mine=1">My reviews</a></li>
   <li><a href="{% url 'accounts:review_drafts' %}">Review drafts</a></li>
-  <li><a href="{% url 'content:manage_post_list' %}">All posts</a></li>
+  <li><a href="{% url 'content:manage_post_list' %}">All articles</a></li>
   <li><a href="{% url 'content:manage_review_list' %}">All reviews</a></li>
   <li><a href="{% url 'content:manage_category_list' %}">Categories</a></li>
+  <li><a href="{% url 'content:manage_newsletter_list' %}">Newsletter</a></li>
   <li><a href="{% url 'accounts:user_list' %}">Manage users</a></li>
+  <li><a href="{% url 'accounts:writer_applications_list' %}">Writer applications</a></li>
   <li><a href="{% url 'accounts:editor_applications_list' %}">Editor applications</a></li>
   <li><a href="/admin/" target="_blank" rel="noopener">Open Django Admin</a></li>
+  <li><a href="{% url 'reader:account_settings' %}">Settings</a></li>
+  <li><a href="{% url 'reader:account_bookmarks' %}">Bookmarks</a></li>
+  <li><a href="{% url 'reader:account_preferences' %}">Preferences</a></li>
   <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
 </ul>
 {% elif user_role == 'editor' %}
-<ul class="list-unstyled n2m-menu-list mb-4">
+<ul class="list-unstyled n2m-menu-list mb-4" aria-label="Editor menu">
   <li><a href="{% url 'accounts:dashboard_editor' %}">Editor dashboard</a></li>
-  <li><a href="{% url 'content:manage_post_list' %}?mine=1">My posts</a></li>
+  <li><a href="{% url 'content:manage_post_list' %}?mine=1">My articles</a></li>
   <li><a href="{% url 'content:manage_review_list' %}?mine=1">My reviews</a></li>
   <li><a href="{% url 'accounts:review_drafts' %}">Review drafts</a></li>
-  <li><a href="{% url 'content:manage_post_list' %}">All posts</a></li>
+  <li><a href="{% url 'content:manage_post_list' %}">All articles</a></li>
   <li><a href="{% url 'content:manage_review_list' %}">All reviews</a></li>
   <li><a href="{% url 'content:manage_category_list' %}">Categories</a></li>
+  <li><a href="{% url 'content:manage_newsletter_list' %}">Newsletter</a></li>
+  <li><a href="{% url 'reader:account_settings' %}">Settings</a></li>
+  <li><a href="{% url 'reader:account_bookmarks' %}">Bookmarks</a></li>
+  <li><a href="{% url 'reader:account_preferences' %}">Preferences</a></li>
   <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
 </ul>
 {% elif user_role == 'writer' %}
-<ul class="list-unstyled n2m-menu-list mb-4">
+<ul class="list-unstyled n2m-menu-list mb-4" aria-label="Writer menu">
   <li><a href="{% url 'accounts:dashboard_writer' %}">Writer dashboard</a></li>
-  <li><a href="{% url 'content:writer_post_create' %}">New post</a></li>
-  <li><a href="{% url 'content:writer_post_list' %}">Your posts</a></li>
+  <li><a href="{% url 'content:writer_post_create' %}">New article</a></li>
+  <li><a href="{% url 'content:writer_post_list' %}">Your articles</a></li>
   <li><a href="{% url 'content:writer_review_create' %}">New review</a></li>
   <li><a href="{% url 'content:writer_review_list' %}">Your reviews</a></li>
   <li><a href="{% url 'accounts:editor_apply' %}">Apply to be an editor</a></li>
+  <li><a href="{% url 'reader:account_settings' %}">Settings</a></li>
+  <li><a href="{% url 'reader:account_bookmarks' %}">Bookmarks</a></li>
+  <li><a href="{% url 'reader:account_preferences' %}">Preferences</a></li>
   <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
 </ul>
 {% else %}
 <ul class="list-unstyled n2m-menu-list mb-4">
-  <li><a href="{% url 'accounts:dashboard_reader' %}">Dashboard</a></li>
   <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+  <li><a href="{% url 'reader:account_bookmarks' %}">Bookmarks</a></li>
+  <li><a href="{% url 'reader:account_preferences' %}">Preferences</a></li>
+  <li><a href="{% url 'content:newsletter_archive' %}">Newsletter</a></li>
 </ul>
 {% endif %}
 {% endif %}
 
-<div class="n2m-sidebar-theme d-flex justify-content-end align-items-center mb-4">
-  <span class="n2m-menu-title text-uppercase me-2 small">Theme</span>
-  <button type="button" class="btn n2m-theme-toggle border-0 bg-transparent p-2" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark theme">
-    <span class="n2m-theme-icon-dark" aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </span>
-    <span class="n2m-theme-icon-light d-none" aria-hidden="true">
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </span>
-  </button>
-</div>
+{# Theme toggle is on every page in base.html navbar (id="themeToggle"). #}

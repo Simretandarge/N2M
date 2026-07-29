@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if issue %}Edit newsletter{% else %}New newsletter{% endif %}{% endblock %}
+{% block meta_description %}{% if issue %}Edit newsletter draft.{% else %}Create a new newsletter issue.{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <header class="mb-4">
+    <h1 class="h2 text-white mb-1">{% if issue %}Edit newsletter{% else %}New newsletter{% endif %}</h1>
+    <p class="text-muted mb-0">Write the title and body. After saving, go to the Newsletter list and click <strong>Send</strong> to email all subscribers.</p>
+  </header>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <form method="post" action="{% if issue %}{% url 'content:manage_newsletter_edit' issue.pk %}{% else %}{% url 'content:manage_newsletter_create' %}{% endif %}" enctype="multipart/form-data" class="card card-n2m p-4">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="mb-3">
+          <label for="id_title" class="form-label text-white">Title</label>
+          {{ form.title }}
+          <div class="form-text text-muted">Shown in the email subject as “{{ SITE_NAME }} — [your title]”.</div>
+          {% if form.title.errors %}<div class="form-text text-danger">{{ form.title.errors }}</div>{% endif %}
+        </div>
+        <div class="mb-3">
+          <label for="id_content" class="form-label text-white">Content</label>
+          {{ form.content }}
+          <div class="form-text text-muted">Plain text or HTML. This is the body of the email.</div>
+          {% if form.content.errors %}<div class="form-text text-danger">{{ form.content.errors }}</div>{% endif %}
+        </div>
+        {% if issue %}
+        {% include "content/partials/extra_media_gallery_list.html" with media_queryset=issue.media_items.all title="Gallery — extra images & videos (saved)" %}
+        {% endif %}
+        {% include "content/partials/instagram_media_upload.html" with cover_image_field=form.hero_image cover_video_field=form.hero_video extra_images_field=form.extra_images extra_videos_field=form.extra_videos %}
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-n2m">Save</button>
+          <a href="{% url 'content:manage_newsletter_list' %}" class="btn btn-outline-n2m">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

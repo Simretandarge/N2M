@@ -9,24 +9,45 @@
   <meta property="og:site_name" content="{{ SITE_NAME }}">
   <meta property="og:type" content="website">
   {% endblock %}
-  <meta name="description" content="{% block meta_description %}{{ SITE_TAGLINE }} Technology, AI, Startups, and innovation. Africa and global context.{% endblock %}">
+  <meta name="description" content="{% block meta_description %}{{ SITE_TAGLINE }} {{ SITE_DESCRIPTION }}{% endblock %}">
   {% block meta_extra %}{% endblock %}
   <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}?v=20260728v">
+  {# Inline fallback: light theme bands/cards stay visible if theme.css on the server is stale. #}
+  <style>
+    html[data-theme="light"] .navbar-n2m-bbc .navbar-n2m-container > .n2m-nav-row1 {
+      border-bottom: 1px solid #94a3b8 !important;
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.12) !important;
+    }
+    html[data-theme="light"] .n2m-nav-row2-inner {
+      background: #e2e8f0 !important;
+      border: 1px solid #94a3b8 !important;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12) !important;
+    }
+    html[data-theme="light"] .card-n2m {
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08) !important;
+    }
+    html[data-theme="light"] main.main-n2m {
+      border-top: 2px solid #cbd5e1 !important;
+    }
+  </style>
   {% block head_extra %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
+  <!-- Spacer reserves space for fixed navbar so main content never sits underneath -->
+  <div class="n2m-nav-spacer" aria-hidden="true"></div>
   <nav class="navbar navbar-expand-lg navbar-n2m navbar-n2m-bbc" id="mainNav" aria-label="Main navigation">
     <div class="navbar-n2m-accent" aria-hidden="true"></div>
     <div class="container-fluid navbar-n2m-container">
       <!-- Row 1: Menu (left) | Logo (center) | Account (right) — always visible -->
       <div class="n2m-nav-row1 d-flex align-items-center justify-content-between" style="display: flex !important; min-height: 56px; visibility: visible !important;">
-        <div class="n2m-nav-left d-flex align-items-center">
-          <button type="button" class="btn btn-n2m-menu d-flex align-items-center justify-content-center" data-bs-toggle="offcanvas" data-bs-target="#n2mAccountMenu" aria-controls="n2mAccountMenu" aria-label="Open menu">
+        <div class="n2m-nav-left d-flex align-items-center d-lg-none">
+          <button class="navbar-toggler n2m-nav-row2-toggler border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle menu">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
         </div>
@@ -36,18 +57,40 @@
           </span>
           <span class="navbar-brand-text">{{ SITE_NAME }}</span>
         </a>
-        <div class="n2m-nav-right d-flex align-items-center gap-2">
+        <div class="n2m-nav-right d-flex align-items-center gap-2 ms-auto">
           {% if user.is_authenticated %}
           <div class="dropdown">
             <a class="nav-account-trigger dropdown-toggle" href="#" id="navAccount" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span class="nav-account-avatar">{{ user.get_short_name|default:user.username|slice:":1"|upper }}</span>
+              <span class="nav-account-avatar">
+                {% if nav_profile_photo_url %}
+                <img src="{{ nav_profile_photo_url }}" alt="{{ user.username }}" class="nav-account-avatar-img">
+                {% else %}
+                {{ user.get_short_name|default:user.username|slice:":1"|upper }}
+                {% endif %}
+              </span>
               <span class="nav-account-name d-none d-md-inline">{{ user.get_short_name|default:user.username }}</span>
             </a>
             <ul class="dropdown-menu dropdown-n2m dropdown-menu-end" aria-labelledby="navAccount">
               <li><span class="dropdown-item-text dropdown-item-text-n2m">{{ user_role_label }}</span></li>
               <li><hr class="dropdown-divider"></li>
+              {% if user_role != 'reader' %}
               <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}">Dashboard</a></li>
+              {% endif %}
               <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Profile</a></li>
+              <li><a class="dropdown-item" href="{% url 'reader:account_settings' %}">Settings</a></li>
+              <li>
+                <button type="button" class="dropdown-item d-flex align-items-center justify-content-between gap-3 n2m-theme-toggle-dropdown" id="themeToggle" aria-label="Toggle light or dark theme" title="Light / dark theme">
+                  <span>Theme</span>
+                  <span class="d-inline-flex align-items-center flex-shrink-0" aria-hidden="true">
+                    <span class="n2m-theme-icon-dark">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </span>
+                    <span class="n2m-theme-icon-light d-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    </span>
+                  </span>
+                </button>
+              </li>
               <li><hr class="dropdown-divider"></li>
               <li>
                 <form method="post" action="{% url 'accounts:logout' %}">
@@ -58,9 +101,22 @@
             </ul>
           </div>
           {% else %}
+          <div class="n2m-nav-theme-wrap d-flex align-items-center">
+            <button type="button" class="btn n2m-theme-toggle border-0 bg-transparent p-2" id="themeToggle" aria-label="Toggle light or dark theme" title="Light / dark theme">
+              <span class="n2m-theme-icon-dark" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              </span>
+              <span class="n2m-theme-icon-light d-none" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              </span>
+            </button>
+          </div>
           <div class="d-flex align-items-center gap-2">
             <a class="nav-link nav-link-guest" href="{% url 'accounts:login' %}">Sign in</a>
-            <a class="btn btn-n2m btn-sm px-3" href="{% url 'accounts:signup' %}">Register</a>
+            <a class="btn btn-n2m btn-sm px-3" href="{% url 'accounts:signup' %}">
+              <span class="d-none d-sm-inline">Create account</span>
+              <span class="d-inline d-sm-none">Join</span>
+            </a>
           </div>
           {% endif %}
         </div>
@@ -68,31 +124,21 @@
       <!-- Row 2: Main nav links (Home, Articles, ...) — BBC-style horizontal bar -->
       <div class="n2m-nav-row2">
         <div class="container n2m-nav-row2-inner">
-          <button class="navbar-toggler n2m-nav-row2-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
           <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav n2m-nav-links flex-row flex-wrap">
+            <ul class="navbar-nav n2m-nav-links flex-wrap">
               <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'content:home' %}">Home</a></li>
-              <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'post_list' %}active{% endif %}" href="{% url 'content:post_list' %}">Articles</a></li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'category_detail' or request.resolver_match.url_name == 'category_ai' or request.resolver_match.url_name == 'category_startups' %}active{% endif %}" href="#" id="navCategories" role="button" data-bs-toggle="dropdown" aria-expanded="false">Categories</a>
-                <ul class="dropdown-menu dropdown-n2m" aria-labelledby="navCategories">
-                  {% for cat in nav_categories %}
-                  <li>
-                    {% if cat.slug == 'ai' %}<a class="dropdown-item" href="{% url 'content:category_ai' %}">{{ cat.name }}</a>
-                    {% elif cat.slug == 'startups' %}<a class="dropdown-item" href="{% url 'content:category_startups' %}">{{ cat.name }}</a>
-                    {% else %}<a class="dropdown-item" href="{% url 'content:category_detail' cat.slug %}">{{ cat.name }}</a>{% endif %}
-                  </li>
-                  {% empty %}
-                  <li><a class="dropdown-item" href="{% url 'content:category_ai' %}">AI</a></li>
-                  <li><a class="dropdown-item" href="{% url 'content:category_startups' %}">Startups</a></li>
-                  {% endfor %}
-                </ul>
-              </li>
-              <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'review_list' %}active{% endif %}" href="{% url 'content:review_list' %}">Reviews</a></li>
+              {% for dept in nav_departments %}
+              <li class="nav-item"><a class="nav-link {% if request.resolver_match.kwargs.slug == dept.slug %}active{% endif %}" href="{{ dept.get_absolute_url }}">{{ dept.name }}</a></li>
+              {% empty %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'content:category_detail' 'technology' %}">Technology</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'content:category_ai' %}">AI</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'content:category_detail' 'business' %}">Business</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'content:category_startups' %}">Startups</a></li>
+              <li class="nav-item"><a class="nav-link" href="{% url 'content:category_detail' 'innovation' %}">Innovation</a></li>
+              {% endfor %}
+              <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'review_list' or request.resolver_match.url_name == 'review_detail' %}active{% endif %}" href="{% url 'content:review_list' %}">Reviews</a></li>
+              <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'newsletter_archive' or request.resolver_match.url_name == 'newsletter_issue_detail' %}active{% endif %}" href="{% url 'content:newsletter_archive' %}">Newsletter</a></li>
               <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'content:about' %}">About</a></li>
-              <li class="nav-item"><a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'content:contact' %}">Contact</a></li>
             </ul>
           </div>
         </div>
@@ -101,58 +147,40 @@
     <div class="n2m-nav-row2-spacer" id="n2mNavRow2Spacer" aria-hidden="true"></div>
   </nav>
 
-  <div class="offcanvas offcanvas-start n2m-offcanvas-menu" tabindex="-1" id="n2mAccountMenu" aria-labelledby="n2mAccountMenuLabel">
-    <div class="offcanvas-header n2m-offcanvas-header">
-      <h5 class="offcanvas-title" id="n2mAccountMenuLabel">Menu</h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body n2m-offcanvas-body">
-      <form class="n2m-sidebar-search mb-4" action="{% url 'content:post_list' %}" method="get" role="search">
-        <label class="visually-hidden" for="sidebarSearchInput">Search articles</label>
-        <div class="input-group">
-          <input class="form-control n2m-sidebar-search-input" id="sidebarSearchInput" type="search" name="q" placeholder="Search articles…" value="{{ request.GET.q }}" aria-label="Search articles">
-          <button class="btn btn-n2m n2m-sidebar-search-btn" type="submit" aria-label="Search">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          </button>
-        </div>
-      </form>
-      {% include "partials/sidebar_menu_content.html" %}
-    </div>
-  </div>
-
-  <main class="py-4 py-lg-5">
+  <main class="main-n2m py-4 py-lg-5">
     {% if messages %}
       <div class="container mb-3">
         {% for message in messages %}
+          {% if message.message != "Liked." %}
           <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
+          {% endif %}
         {% endfor %}
       </div>
     {% endif %}
     <div class="container">
-      <div class="row">
-        <div class="{% block content_col_class %}col-12{% endblock %}">{% block content %}{% endblock %}</div>
-        {% block sidebar %}{% endblock %}
+      <div class="{% block content_col_class %}col-12{% endblock %}">
+        {% block content %}{% endblock %}
       </div>
     </div>
   </main>
 
   <footer class="footer-n2m py-5 mt-auto">
-    <div class="container">
+    <div class="container footer-n2m-inner">
       <div class="row">
         <div class="col-lg-4 mb-4 mb-lg-0">
           <h5 class="text-white mb-3">{{ SITE_NAME }}</h5>
-          <p class="small mb-0">{{ SITE_TAGLINE }}</p>
-          <p class="small text-muted mt-2">Technology, AI, Startups &amp; innovation. Africa and global context.</p>
+          <p class="small mb-1">{{ SITE_TAGLINE }}</p>
+          <p class="small text-muted mb-0">Technology, AI, Business, Startups &amp; Innovation.</p>
         </div>
         <div class="col-lg-2 col-6 mb-4 mb-lg-0">
-          <h6 class="text-white mb-3">Content</h6>
+          <h6 class="text-white mb-3">Explore</h6>
           <ul class="list-unstyled small">
-            <li><a href="{% url 'content:post_list' %}">Articles</a></li>
-            <li><a href="{% url 'content:category_ai' %}">AI</a></li>
-            <li><a href="{% url 'content:category_startups' %}">Startups</a></li>
+            {% for dept in nav_departments %}
+            <li><a href="{{ dept.get_absolute_url }}">{{ dept.name }}</a></li>
+            {% endfor %}
             <li><a href="{% url 'content:review_list' %}">Reviews</a></li>
           </ul>
         </div>
@@ -166,11 +194,28 @@
           </ul>
         </div>
         <div class="col-lg-4">
-          <h6 class="text-white mb-3">Newsletter</h6>
-          <form action="{% url 'content:newsletter_signup' %}" method="post" class="d-flex gap-2">
+          <h6 class="text-white mb-3">Stay Connected</h6>
+          <div class="n2m-social-inline mb-3" aria-label="Social links">
+            <a href="https://www.linkedin.com/company/next251-media-n2m/about/?viewAsMember=true" target="_blank" rel="noopener" class="n2m-social-link" aria-label="LinkedIn" title="LinkedIn">
+              <span class="n2m-social-icon n2m-social-linkedin" aria-hidden="true">in</span>
+            </a>
+            <a href="https://www.instagram.com/next251media/" target="_blank" rel="noopener" class="n2m-social-link" aria-label="Instagram" title="Instagram">
+              <span class="n2m-social-icon n2m-social-instagram" aria-hidden="true">◎</span>
+            </a>
+            <a href="https://www.facebook.com/share/1AhUPMiwDS/" target="_blank" rel="noopener" class="n2m-social-link" aria-label="Facebook" title="Facebook">
+              <span class="n2m-social-icon n2m-social-facebook" aria-hidden="true">f</span>
+            </a>
+            <a href="https://www.youtube.com/@Next251-M" target="_blank" rel="noopener" class="n2m-social-link" aria-label="YouTube" title="YouTube">
+              <span class="n2m-social-icon n2m-social-youtube" aria-hidden="true">▶</span>
+            </a>
+          </div>
+          <p class="small text-muted mb-2">{{ NEWSLETTER_PRODUCT_NAME }}</p>
+          <form action="{% url 'content:newsletter_signup' %}" method="post" class="newsletter-signup-form">
             {% csrf_token %}
-            <input type="email" name="email" class="form-control" placeholder="Your email" required>
-            <button type="submit" class="btn btn-n2m flex-shrink-0">Subscribe</button>
+            <div class="input-group input-group-sm">
+              <input type="email" name="email" class="form-control" placeholder="Your email" required aria-label="Email for newsletter">
+              <button type="submit" class="btn btn-n2m btn-sm">Subscribe</button>
+            </div>
           </form>
         </div>
       </div>
@@ -181,8 +226,202 @@
 
   <a href="#" class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">↑</a>
 
+  {% include "content/partials/share_sheet_global.html" %}
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="{% static 'js/n2m.js' %}"></script>
+  <script src="{% static 'js/n2m.js' %}?v=20260620save1"></script>
+  <script>
+    // Disabled: this fallback caused double-toggle when combined with main n2m.js handlers.
+    // Keep like/save behavior exclusively in static/js/n2m.js.
+    (function () {
+      return;
+    })();
+
+    // Fallback share menu handler (works even when n2m.js is stale on server).
+    (function () {
+      function toAbsoluteUrl(url) {
+        if (!url) return "";
+        if (/^https?:\/\//i.test(url)) return url;
+        return window.location.origin.replace(/\/$/, "") + (url.charAt(0) === "/" ? url : "/" + url);
+      }
+      function shareUrlFor(network, url, title) {
+        var u = encodeURIComponent(url);
+        var t = encodeURIComponent(title || document.title || "");
+        if (network === "linkedin") return "https://www.linkedin.com/sharing/share-offsite/?url=" + u;
+        if (network === "facebook") return "https://www.facebook.com/sharer/sharer.php?u=" + u;
+        if (network === "messenger") return "https://www.facebook.com/dialog/send?link=" + u + "&app_id=291494419107518&redirect_uri=" + u;
+        if (network === "whatsapp") return "https://api.whatsapp.com/send?text=" + t + "%20" + u;
+        if (network === "email") return "mailto:?subject=" + t + "&body=" + u;
+        if (network === "threads") return "https://www.threads.net/";
+        if (network === "instagram") return "https://www.instagram.com/";
+        if (network === "tiktok") return "https://www.tiktok.com/";
+        if (network === "twitter") return "https://twitter.com/intent/tweet?url=" + u + "&text=" + t;
+        return "";
+      }
+
+      document.addEventListener("click", function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest(".web-share-btn") : null;
+        if (btn) {
+          e.preventDefault();
+          e.stopPropagation();
+          var globalWrap = document.getElementById("n2m-share-global");
+          if (!globalWrap) return;
+          var menu = globalWrap.querySelector(".n2m-share-menu");
+          var backdrop = globalWrap.querySelector(".n2m-share-backdrop");
+          var dataSource = globalWrap.querySelector(".n2m-share-data-source");
+          var row = globalWrap.querySelector(".n2m-share-sheet-row");
+          var prevBtn = globalWrap.querySelector(".n2m-share-scroll-prev");
+          var nextBtn = globalWrap.querySelector(".n2m-share-scroll-next");
+          var card = btn.closest(".card-n2m");
+          if (!menu || !dataSource) return;
+          function updateArrow() {
+            if (!row) return;
+            var hasMore = row.scrollWidth > row.clientWidth + 4;
+            var atStart = row.scrollLeft <= 4;
+            var atEnd = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
+            if (prevBtn) {
+              if (hasMore) prevBtn.removeAttribute("hidden");
+              else prevBtn.setAttribute("hidden", "hidden");
+              prevBtn.disabled = atStart;
+            }
+            if (nextBtn) {
+              if (hasMore) nextBtn.removeAttribute("hidden");
+              else nextBtn.setAttribute("hidden", "hidden");
+              nextBtn.disabled = !hasMore || atEnd;
+            }
+          }
+          function updateArrowAfterLayout() {
+            updateArrow();
+            requestAnimationFrame(function () {
+              updateArrow();
+              requestAnimationFrame(updateArrow);
+            });
+          }
+          var wasHidden = menu.hasAttribute("hidden");
+          menu.setAttribute("hidden", "hidden");
+          if (backdrop) backdrop.setAttribute("hidden", "hidden");
+          document.querySelectorAll(".web-share-btn").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+          document.querySelectorAll(".card-n2m.n2m-share-open").forEach(function (c) { c.classList.remove("n2m-share-open"); });
+          globalWrap.setAttribute("aria-hidden", "true");
+          if (!wasHidden) {
+            return;
+          }
+          dataSource.setAttribute("data-url", btn.getAttribute("data-url") || "");
+          dataSource.setAttribute("data-title", btn.getAttribute("data-title") || "");
+          dataSource.setAttribute("data-summary", btn.getAttribute("data-summary") || "");
+          dataSource.setAttribute("data-image", btn.getAttribute("data-image") || "");
+          dataSource.setAttribute("data-instagram-post-url", btn.getAttribute("data-instagram-post-url") || "");
+          var stepP = globalWrap.querySelector(".n2m-share-step-prepare");
+          var stepM = globalWrap.querySelector(".n2m-share-step-main");
+          if (stepP) stepP.setAttribute("hidden", "hidden");
+          if (stepM) stepM.removeAttribute("hidden");
+          menu.removeAttribute("hidden");
+          if (backdrop) backdrop.removeAttribute("hidden");
+          btn.setAttribute("aria-expanded", "true");
+          if (card) card.classList.add("n2m-share-open");
+          globalWrap.setAttribute("aria-hidden", "false");
+          updateArrowAfterLayout();
+          if (row && !row.dataset.boundArrow) {
+            row.dataset.boundArrow = "1";
+            row.addEventListener("scroll", updateArrow, { passive: true });
+            window.addEventListener("resize", updateArrow);
+          }
+          if (prevBtn && !prevBtn.dataset.boundPrev) {
+            prevBtn.dataset.boundPrev = "1";
+            prevBtn.addEventListener("click", function (ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+              if (row) row.scrollBy({ left: -220, behavior: "smooth" });
+            });
+          }
+          if (nextBtn && !nextBtn.dataset.boundNext) {
+            nextBtn.dataset.boundNext = "1";
+            nextBtn.addEventListener("click", function (ev) {
+              ev.preventDefault();
+              ev.stopPropagation();
+              if (row) row.scrollBy({ left: 220, behavior: "smooth" });
+            });
+          }
+          return;
+        }
+
+        var backdropEl = e.target && e.target.closest ? e.target.closest(".n2m-share-backdrop") : null;
+        if (backdropEl) {
+          backdropEl.setAttribute("hidden", "hidden");
+          var wrapEl = backdropEl.closest("#n2m-share-global");
+          var menuEl = wrapEl ? wrapEl.querySelector(".n2m-share-menu") : null;
+          if (menuEl) menuEl.setAttribute("hidden", "hidden");
+          var stepP2 = wrapEl ? wrapEl.querySelector(".n2m-share-step-prepare") : null;
+          var stepM2 = wrapEl ? wrapEl.querySelector(".n2m-share-step-main") : null;
+          if (stepP2) stepP2.setAttribute("hidden", "hidden");
+          if (stepM2) stepM2.removeAttribute("hidden");
+          document.querySelectorAll(".web-share-btn").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+          document.querySelectorAll(".card-n2m.n2m-share-open").forEach(function (c) { c.classList.remove("n2m-share-open"); });
+          if (wrapEl) wrapEl.setAttribute("aria-hidden", "true");
+          return;
+        }
+
+        var item = e.target && e.target.closest ? e.target.closest(".n2m-share-item") : null;
+        if (item) {
+          if (window.N2M_SHARE_V2) {
+            return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          var parentWrap = item.closest("#n2m-share-global");
+          var dataSrc = parentWrap ? parentWrap.querySelector(".n2m-share-data-source") : null;
+          if (!dataSrc) return;
+          var network = item.getAttribute("data-share-network") || "";
+          var rawUrl = dataSrc.getAttribute("data-url") || "";
+          var absUrl = toAbsoluteUrl(rawUrl);
+          var title = dataSrc.getAttribute("data-title") || document.title || "";
+          if (!absUrl) return;
+
+          if (network === "copy") {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(absUrl).catch(function () {});
+            }
+          } else if (network === "threads" || network === "instagram" || network === "tiktok") {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(absUrl).catch(function () {});
+            }
+            window.open(shareUrlFor(network, absUrl, title), "_blank", "noopener,noreferrer");
+          } else {
+            var target = shareUrlFor(network, absUrl, title);
+            if (network === "email") {
+              window.location.href = target;
+            } else if (target) {
+              window.open(target, "_blank", "noopener,noreferrer");
+            }
+          }
+
+          var parentMenu = parentWrap ? parentWrap.querySelector(".n2m-share-menu") : null;
+          var parentBackdrop = parentWrap ? parentWrap.querySelector(".n2m-share-backdrop") : null;
+          if (parentMenu) parentMenu.setAttribute("hidden", "hidden");
+          if (parentBackdrop) parentBackdrop.setAttribute("hidden", "hidden");
+          document.querySelectorAll(".web-share-btn").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+          document.querySelectorAll(".card-n2m.n2m-share-open").forEach(function (c) { c.classList.remove("n2m-share-open"); });
+          if (parentWrap) parentWrap.setAttribute("aria-hidden", "true");
+          return;
+        }
+
+        if (e.target && e.target.closest && e.target.closest(".n2m-share-menu")) {
+          return;
+        }
+
+        var g = document.getElementById("n2m-share-global");
+        if (g) {
+          var m = g.querySelector(".n2m-share-menu");
+          var bd = g.querySelector(".n2m-share-backdrop");
+          if (m) m.setAttribute("hidden", "hidden");
+          if (bd) bd.setAttribute("hidden", "hidden");
+          g.setAttribute("aria-hidden", "true");
+        }
+        document.querySelectorAll(".web-share-btn[aria-expanded='true']").forEach(function (b) { b.setAttribute("aria-expanded", "false"); });
+        document.querySelectorAll(".card-n2m.n2m-share-open").forEach(function (c) { c.classList.remove("n2m-share-open"); });
+      }, true);
+    })();
+  </script>
   {% block scripts_extra %}{% endblock %}
 </body>
 </html>

@@ -132,7 +132,7 @@ Three roles control who can do what in the admin:
 3. Under **Groups**, add the user to **Writers** or **Editors** (or leave in no group for staff-only with no content permissions).
 4. **Admin** = the superuser account; no group needed.
 
-**Writer rules:** Writers see only their own posts/reviews, cannot set **Status** to Published or **Featured**, and cannot add/edit categories or newsletter subscribers. New posts/reviews are automatically set to their author.
+**Writer rules:** Writers see only their own articles/reviews, cannot set **Status** to Published or **Featured**, and cannot add/edit categories or newsletter subscribers. New articles/reviews are automatically set to their author.
 
 ## Tech stack
 

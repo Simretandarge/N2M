@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Settings{% endblock %}
+{% block meta_description %}Your account settings: profile, liked posts, bookmarks, preferences.{% endblock %}
+{% block content_col_class %}col-12{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-10 mx-auto">
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <a href="{% url 'accounts:profile' %}" class="card card-n2m p-4 h-100 text-decoration-none d-block">
+            <h2 class="h5 text-white mb-2">Profile</h2>
+            <p class="text-muted small mb-0">Edit your name, email, and password.</p>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <a href="{% url 'reader:account_liked_posts' %}" class="card card-n2m p-4 h-100 text-decoration-none d-block">
+            <h2 class="h5 text-white mb-2">Liked posts</h2>
+            <p class="text-muted small mb-0">Articles you liked. <strong class="text-white">{{ liked_count }}</strong> post{{ liked_count|pluralize }}.</p>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <a href="{% url 'reader:account_bookmarks' %}" class="card card-n2m p-4 h-100 text-decoration-none d-block">
+            <h2 class="h5 text-white mb-2">Bookmarks</h2>
+            <p class="text-muted small mb-0">Saved articles, reviews, and newsletters. <strong class="text-white">{{ bookmarks_count }}</strong> saved.</p>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <a href="{% url 'reader:account_preferences' %}" class="card card-n2m p-4 h-100 text-decoration-none d-block">
+            <h2 class="h5 text-white mb-2">Preferences</h2>
+            <p class="text-muted small mb-0">Topics you follow and newsletter settings.</p>
+          </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <a href="{% url 'accounts:password_change' %}" class="card card-n2m p-4 h-100 text-decoration-none d-block">
+            <h2 class="h5 text-white mb-2">Password</h2>
+            <p class="text-muted small mb-0">Change your password.</p>
+          </a>
+        </div>
+      </div>
+
+      {% if user_role == 'reader' %}
+      <div class="card card-n2m p-4 mt-4">
+        <h2 class="h5 text-white mb-3">Contribute</h2>
+        <p class="text-muted small mb-3">Want to write for N2M? Apply to become a writer.</p>
+        {% if writer_application_pending %}
+        <p class="text-info small mb-2">You have a pending application.</p>
+        <a href="{% url 'accounts:writer_apply' %}" class="btn btn-outline-n2m btn-sm">View application</a>
+        {% else %}
+        <a href="{% url 'accounts:writer_apply' %}" class="btn btn-n2m btn-sm">Apply to be a writer</a>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

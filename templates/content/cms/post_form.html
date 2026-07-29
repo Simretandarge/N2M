@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{% if post %}Edit post{% else %}New post{% endif %}{% endblock %}
+{% block title %}{% if post %}Edit article{% else %}New article{% endif %}{% endblock %}
 {% block meta_description %}{% if post %}Edit post.{% else %}Create a new post.{% endif %}{% endblock %}
 
 {% block content %}
 <div class="container py-4">
   <header class="mb-4">
-    <h1 class="h2 text-white mb-1">{% if post %}Edit post{% else %}New post{% endif %}</h1>
+    <h1 class="h2 text-white mb-1">{% if post %}Edit article{% else %}New article{% endif %}</h1>
     <p class="text-muted mb-0">Admins can publish directly. Editors can only save as draft; another editor or admin must approve and publish.</p>
     {% if editor_cannot_self_publish %}
     <div class="alert alert-info mt-2 mb-0 py-2 small">Your posts must be approved by another editor or admin before they go live. Save as draft and ask a colleague to review.</div>
@@ -60,12 +60,16 @@
           {{ form.content }}
           {% if form.content.errors %}<div class="form-text text-danger">{{ form.content.errors }}</div>{% endif %}
         </div>
-        <div class="mb-4">
-          <label for="id_featured_image" class="form-label text-white">Featured image</label>
-          {{ form.featured_image }}
-          {% if post and post.featured_image %}<p class="mt-2 mb-0 small text-muted">Current: <a href="{{ post.featured_image.url }}" target="_blank" rel="noopener">{{ post.featured_image.name }}</a></p>{% endif %}
-          {% if form.featured_image.errors %}<div class="form-text text-danger">{{ form.featured_image.errors }}</div>{% endif %}
+        <div class="mb-3">
+          <label for="id_instagram_post_url" class="form-label text-white">Instagram post or reel URL</label>
+          {{ form.instagram_post_url }}
+          <div class="form-text text-muted">After you publish on @next251media, paste the link here. “Share → Open Instagram” uses it; leave blank to open the profile instead.</div>
+          {% if form.instagram_post_url.errors %}<div class="form-text text-danger">{{ form.instagram_post_url.errors }}</div>{% endif %}
         </div>
+        {% if post %}
+        {% include "content/partials/extra_media_gallery_list.html" with media_queryset=post.media_items.all title="Gallery — extra images & videos (saved)" %}
+        {% endif %}
+        {% include "content/partials/instagram_media_upload.html" with cover_image_field=form.featured_image cover_video_field=form.featured_video extra_images_field=form.extra_images extra_videos_field=form.extra_videos %}
         <div class="d-flex gap-2">
           <button type="submit" class="btn btn-n2m">Save</button>
           <a href="{% url 'content:manage_post_list' %}" class="btn btn-outline-n2m">Cancel</a>
